@@ -8,6 +8,7 @@ directory with a `HANDOFF.md` as its living record.
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
+| `aptean-accounting-assets/` | Aptean EAM ↔ Accounting fixed-asset reconciliation (Chase / Nhan) | Open — see the action list in its `HANDOFF.md` §9 |
 
 ## Conventions
 
