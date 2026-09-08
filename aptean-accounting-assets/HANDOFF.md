@@ -94,12 +94,25 @@ paperwork the way buying one does.
 
 ### If an automation is wanted anyway
 
-Do not automate the Excel file — move the shared tracker to a **SharePoint / Microsoft List**. Lists *do* have real
-automatic triggers, and a built-in **Rules** feature (Automate ▸ Create a rule) that emails someone when an item is
-created or a column changes, with no Power Automate authoring at all. Caveats: the rule emails are generic and not
-customizable, the recipient must be in the organization (no guests), and a rule cannot notify a whole team group.
-A List can be created directly from the existing Excel file. This is the only version of "365 automation" here that
-is worth the setup — but it still watches a copy, so it ranks below an Aptean-native report.
+Do not automate the Excel file — move the shared tracker to a **SharePoint / Microsoft List**. A List *does* have
+real automatic change triggers, and a List can be built directly from the existing Excel file. Two tiers, and they
+answer different questions:
+
+**Tier 1 — built-in Rules** (Automate ▸ Rules ▸ Create a rule). No Power Automate authoring. Fires on: a new item
+is created, an item is deleted, a column changes, or a column value changes to a specific value. Action is an email
+to one or more named people, sent from `no-reply@sharepointonline.com`. Max 15 rules per list. **The rule email is
+generic and cannot be customized — it says an item changed and links to it, it does not carry the column values.**
+So a rule is a *nudge*, not a report. Good for alerting Jonathan that the sheet moved; not good for giving Chase
+something pasteable. Recipients must be in-org (no guests), and a rule cannot notify a whole team group.
+
+**Tier 2 — Power Automate on the List.** Unlike the Excel connector, the SharePoint connector has a genuine
+*When an item is created or modified* trigger, so a flow can build a formatted email with the actual asset rows in
+it. Cost: *modified* fires on **every** edit, including typo fixes — during the item-2 reconciliation that could be
+dozens of mails in an afternoon. Trigger on *created* only, or add a condition, if this route is taken.
+
+Two things this does not fix, and they are why it still ranks below an Aptean-native report (§8 q1): it watches a
+**copy** rather than the system of record, and it requires Chase and Nhan to work in a SharePoint list instead of
+Excel — a real ask of people whose own listing is an invoice-based Excel export.
 
 ## 5. Standing email format
 
@@ -163,6 +176,8 @@ Item 2 is a one-time cleanup. Without this, it has to be redone in 2027:
 - Missing Excel triggers, and routing via SharePoint instead — https://community.powerplatform.com/forums/thread/details/?threadid=44b472e1-8ce5-ef11-be1f-7c1e52585ca6
 - Power Automate for Excel: actions, patterns and limits — https://citizendevelopmentacademy.com/power-automate-for-excel/
 - SharePoint / Lists Rules for notifications, and their limits — https://www.bulb.digital/blog/add-basic-notifications-to-lists-and-libraries-with-rules
+- Create a rule to automate a list or library (Microsoft) — https://support.microsoft.com/en-us/sharepoint/lists/documents-and-library/create-a-rule-to-automate-a-list-or-library
+- Rules in SharePoint Online / Microsoft Lists: conditions and the 15-rule limit — https://ganeshsanapblogs.wordpress.com/2021/01/27/rules-in-sharepoint-online-microsoft-lists/
 - Turn on notifications for list and list item changes (Microsoft) — https://support.microsoft.com/en-us/office/turn-notifications-on-for-list-and-list-item-changes-85ca9280-f4b1-485a-a49e-a593ffa62e39
 - Ghost assets / unrecorded disposals and their audit impact — https://cpcongroup.com/insights/article/ghost-asset-detection/
 - Fixed asset disposal accounting — https://www.accountingtools.com/articles/fixed-asset-disposal-accounting
