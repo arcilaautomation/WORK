@@ -49,8 +49,8 @@ so an invoice number is the single strongest join key available and turns most o
 
 ## 4. Item 3 — how to notify going forward (the decision)
 
-**Recommendation: do not build a Power Automate flow that watches the Excel file. Use a scheduled monthly
-email off an Aptean report, plus a same-week email for disposals.** Reasoning below.
+**Decided 2026-09-09: a standing monthly email to Chase and Nhan, sent whether or not anything changed, plus a
+same-week email for any disposal. No Power Automate flow, no SharePoint list.** Reasoning below.
 
 ### Why not "automate when the Excel sheet is updated"
 
@@ -92,42 +92,79 @@ paperwork the way buying one does.
 4. **Chase the automatic option (item 3a) first** — if Aptean can schedule a saved query and email it, that beats
    everything here, because it needs no human discipline and reads the system of record directly. See §8.
 
-### If an automation is wanted anyway
+### Considered and declined — SharePoint / Microsoft List
 
-Do not automate the Excel file — move the shared tracker to a **SharePoint / Microsoft List**. A List *does* have
-real automatic change triggers, and a List can be built directly from the existing Excel file. Two tiers, and they
-answer different questions:
+Recorded so it is not re-proposed from scratch. Moving the shared tracker off Excel and into a SharePoint /
+Microsoft List is the only version of "365 automation" that actually works, because a List has real automatic
+change triggers where Excel has none. Two tiers exist: built-in **Rules** (Automate ▸ Rules ▸ Create a rule) fire
+on item created / deleted / column changed and email named in-org people, with no flow authoring but a **generic,
+non-customizable email that carries no column values** — a nudge, not a report; and a **Power Automate flow on the
+SharePoint connector**, which does have a genuine *When an item is created or modified* trigger and can build a
+formatted email with the real rows (but *modified* fires on every edit, including typo fixes).
 
-**Tier 1 — built-in Rules** (Automate ▸ Rules ▸ Create a rule). No Power Automate authoring. Fires on: a new item
-is created, an item is deleted, a column changes, or a column value changes to a specific value. Action is an email
-to one or more named people, sent from `no-reply@sharepointonline.com`. Max 15 rules per list. **The rule email is
-generic and cannot be customized — it says an item changed and links to it, it does not carry the column values.**
-So a rule is a *nudge*, not a report. Good for alerting Jonathan that the sheet moved; not good for giving Chase
-something pasteable. Recipients must be in-org (no guests), and a rule cannot notify a whole team group.
+Declined 2026-09-09 for three reasons, in order of weight:
+1. Nobody on this side is set up to build or maintain it, and an unmaintained flow fails silently.
+2. It requires Chase and Nhan to work in a SharePoint list instead of Excel — a real ask of people whose own
+   listing is an invoice-based Excel export.
+3. It still watches a **copy**. A disposal never typed into the tracker fires no trigger.
 
-**Tier 2 — Power Automate on the List.** Unlike the Excel connector, the SharePoint connector has a genuine
-*When an item is created or modified* trigger, so a flow can build a formatted email with the actual asset rows in
-it. Cost: *modified* fires on **every** edit, including typo fixes — during the item-2 reconciliation that could be
-dozens of mails in an afternoon. Trigger on *created* only, or add a condition, if this route is taken.
+Revisit only if the event volume grows enough that a manual monthly email is genuinely burdensome.
 
-Two things this does not fix, and they are why it still ranks below an Aptean-native report (§8 q1): it watches a
-**copy** rather than the system of record, and it requires Chase and Nhan to work in a SharePoint list instead of
-Excel — a real ask of people whose own listing is an invoice-based Excel export.
+## 5. The monthly email — setup and drafts
 
-## 5. Standing email format
+### Outlook recurring reminder
+
+Calendar ▸ New Appointment ▸ **Recurrence ▸ Monthly**. Subject: *"Send Aptean asset changes to Chase & Nhan."*
+**Paste the standing draft below into the body of the appointment**, so the template is in front of you when the
+reminder fires and there is nothing to go find. Default timing: **first business day of the month, covering the
+prior month**, until Chase confirms Accounting's close date (§8 q3) — then move it a few days ahead of that.
+
+### Standing monthly draft
 
 Subject: `Aptean asset changes — <Month YYYY> — Buddy's Kitchen`
 
-One table, same columns every month, so Chase can paste it straight into the register:
+> Chase, Nhan —
+>
+> Aptean asset changes for <Month YYYY> below.
+>
+> *(table, or:)* No assets were added or disposed in Aptean this month.
+>
+> Accounting asset numbers for the additions — send them back when assigned and I'll record them against the
+> Aptean records so the two lists stay tied together.
+>
+> Jonathan
 
 | Aptean asset ID | Description | Line / location | Event | Event date | PO / invoice # | Cost if known | Accounting asset # | Notes |
 |---|---|---|---|---|---|---|---|---|
 
 - **Event** is one of `Added`, `Disposed`, `Replaced`, `Transferred`.
 - **Accounting asset #** is left blank on additions — that is Chase's column to fill and send back (§6).
-- When nothing changed, send the email anyway with "No additions or disposals this month."
-- Only send records at or above Accounting's capitalization threshold (§8) — that is what keeps printer controllers
-  off Chase's desk without anyone having to filter by hand.
+- **Send the email even when nothing changed.** The null report is the whole point: it makes a missing month
+  detectable. Chase notices a monthly email that did not arrive; nobody notices an ad-hoc email never sent.
+- Only send records at or above Accounting's capitalization threshold (§8 q2) — that is what keeps printer
+  controllers off Chase's desk without anyone filtering by hand.
+
+### Kickoff draft (reply on Accounting's thread, send once)
+
+> Chase, Nhan —
+>
+> On the "email when assets are added or disposed" item: rather than automating off the spreadsheet, I'll send a
+> standing monthly email on the first business day covering the prior month — and I'll send it even in months with
+> no changes, so a missing email is a signal rather than silence. Anything disposed I'll send that same week
+> instead of holding it, since a scrapped asset shouldn't sit for four weeks.
+>
+> Three things that would help me size what to send you:
+>
+> 1. What's your capitalization threshold? That tells me which Aptean records are worth sending and keeps the
+>    non-capital equipment off your desk.
+> 2. What's your month-end close date, so I can time the email ahead of it?
+> 3. When you assign an accounting asset number to a new asset, can you send it back to me? I'd like to store it on
+>    the Aptean record so future comparisons are a lookup instead of a project.
+>
+> I'm also checking whether Aptean can send a scheduled report automatically — if it can, I'll switch this over and
+> it stops depending on me remembering.
+>
+> Jonathan
 
 ## 6. The durable fix — join the two systems permanently
 
@@ -144,6 +181,9 @@ Item 2 is a one-time cleanup. Without this, it has to be redone in 2027:
 
 - **2026-09-08** Accounting (Chase) emailed the two listings and the four-item to-do list; follow-up meeting to be
   scheduled for September. Notification approach decided as above; nothing built or sent yet.
+- **2026-09-09** Notification method **decided**: standing monthly email, plus same-week note for disposals.
+  SharePoint/Microsoft List route evaluated and declined (§4). Kickoff and standing drafts written (§5). Not yet
+  sent; Outlook recurrence not yet created.
 
 ## 8. Open questions
 
@@ -162,13 +202,16 @@ Item 2 is a one-time cleanup. Without this, it has to be redone in 2027:
 
 ## 9. Action list
 
-1. [ ] Pull the Aptean date columns (+ PO/invoice if present) and send to Chase — item 1.
-2. [ ] Ask Chase for the capitalization threshold and the close date (questions 2 and 3).
-3. [ ] Ask Aptean support the §8-question-1 wording; decide native vs. manual on the answer.
+1. [ ] Send the §5 kickoff draft on Accounting's thread — confirms the method and asks questions 2, 3 and the
+   asset-number return path in one go.
+2. [ ] Create the monthly Outlook recurrence, standing draft pasted into the appointment body (§5).
+3. [ ] Pull the Aptean date columns (+ PO/invoice if present) and send to Chase — item 1.
 4. [ ] Build the saved Aptean report: assets added or status-changed in the last month, in the §5 columns.
-5. [ ] Set the recurring Outlook reminder and send month 1 — even if it is a null report.
-6. [ ] Work item 2 (the match) with Chase and Nhan; prioritize post-Aug-2024 items and high-dollar lines.
-7. [ ] Add the Accounting Asset # field in Aptean and agree the return path with Chase — §6.
+5. [ ] Ask Aptean support the §8-question-1 wording; if native scheduling exists, switch to it and retire the
+   manual step.
+6. [ ] Send month 1 — even if it is a null report.
+7. [ ] Work item 2 (the match) with Chase and Nhan; prioritize post-Aug-2024 items and high-dollar lines.
+8. [ ] Add the Accounting Asset # field in Aptean and record the numbers Chase returns — §6.
 
 ## 10. Sources
 
