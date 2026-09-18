@@ -32,9 +32,9 @@ compressor inlet. Reasoning in §2.
 ## 2. Why the pad-and-magnets plan should not be used
 
 1. **Far too coarse.** MERV 6 captures 35–49.9 % of the 3–10 µm fraction (ASHRAE 52.2); McMaster lists 35 % at
-   3 µm. A purpose-built compressor intake element is **99 %+ to 5 µm (polyester)** or **99 %+ to 2 µm (paper)**
-   — Solberg published spec. Better than half of the abrasive dust in the damaging size range would pass. The
-   particles that score cylinder walls, valve plates and screw rotors are exactly the ones this pad lets through.
+   3 µm. A purpose-built compressor intake element is **99 %+ to 2 µm (paper)** or **99 %+ to 5–10 µm
+   (polyester)** — Solberg published spec. Better than half of the abrasive dust in the damaging size range
+   would pass. The particles that score cylinder walls, valve plates and screw rotors are exactly the ones this pad lets through.
 
 2. **Unsealed media does not filter — it decorates.** Filtration is a sealing problem. A pad held by magnets has
    an open perimeter, and air takes the lowest-resistance path. As the pad loads, bypass around the edge
@@ -61,16 +61,19 @@ compressor inlet. Reasoning in §2.
 
 ---
 
-## 3. First thing to check — is the filter actually missing?
+## 3. Is the filter actually missing?
 
-Before buying anything, confirm the machine really shipped without intake filtration. Common cases:
+**2026-09-18: reported as genuinely absent — no filter came with the machine.** The checks below are a
+two-minute confirmation, worth doing once before ordering, but the plan of record is now §5 (buy the correct
+threaded filter-silencer). Common cases where one turns up after all:
 
 - Intake filter shipped **loose in the crate or in the parts/literature bag**, not installed.
 - A **red plastic shipping plug** in the inlet port that is meant to be removed and replaced with the filter.
 - On an enclosed rotary screw, the visible opening is the **enclosure louver**; the actual airend intake filter
   lives inside the canopy. What looks like a bare inlet may not be one.
 
-Check the crate, the parts bag, and the parts list in the O&M manual. **VERIFY** — cheapest possible fix.
+Check the crate, the parts bag, and the parts list in the O&M manual. If nothing turns up, go to §5 — a
+Solberg FS (or equivalent) is the correct permanent answer, not a substitute for one.
 
 ---
 
@@ -89,31 +92,63 @@ Off the nameplate and the machine:
 
 ## 5. What to install instead
 
-**Preferred: the OEM intake filter.** Look the part number up against the model/serial and order it. Typically
-$15–60 and stocked. This is the answer that keeps the warranty clean.
+**Key point: this is not "OEM or improvise."** A threaded inlet filter-silencer is the standard, universal,
+off-the-shelf part for this job — it is what most compressors ship with from the factory. Buying one is the
+correct permanent fix, not a stopgap. Solberg FS Series is the reference product; Donaldson and Nugent are
+equivalents. Cost runs roughly $15–40 for small sizes, more as connection size grows.
 
-**Acceptable interim: a threaded intake filter-silencer** that screws directly into the inlet port — metal
-housing, pleated paper or polyester element, integral silencer. Selection criteria:
+### Solberg FS Series — published selection table
 
-| Criterion | Target |
-|---|---|
-| Connection | Match the measured inlet thread exactly (1/2"–2" NPT are the common sizes) |
-| Flow rating | ≥ compressor inlet CFM. **Oversizing is good** — lower ΔP, longer service interval |
-| Filtration | 5 µm @ 99 %+ minimum; 2 µm paper preferred. Polyester if the air is humid, oily or greasy (washable) |
-| Housing | Metal, not plastic — it sits on a hot machine |
-| Silencer | Include it; intake noise is real in a plant space |
+Source: Solberg FS Series catalogs US_FS-sm.pdf (1/4"–1") and US_FS-med.pdf (1/2"–6"), Rev US2506C2.
+All male NPT unless noted. Stamped carbon steel, drawn weatherhood, tubular silencing.
 
-Known sources (prices 2026-09-18, re-check before purchase):
-- Generic 3/4" NPT metal filter-silencer w/ element — Compressor Source, **$14.95**; replacement element FE-01X.
-  Housing 3" tall × 5" wide, element 2.75" dia × 1.625".
-- Solberg F / FT series — the industrial standard. FT = compact, exposed element, low restriction; F = fully
-  drawn weatherhood. Carbon steel, powder coat. Continuous service −15 °F to 220 °F.
-- Also Donaldson, Nugent. Grainger/Zoro stock equivalents.
+| Outlet (MNPT) | SCFM rating | Paper element (2 µm) | Polyester element | Series |
+|---|---|---|---|---|
+| 1/4" | 4 | FS-04-025 | FS-05-025 | small |
+| 3/8" | 8 | FS-04-038 / FS-06-038 | FS-05-038 / FS-07-038 | small |
+| 1/2" | 8 | FS-04-050 | FS-05-050 | small |
+| 1/2" | 12 | FS-06-050 / FS-10-050 | FS-07-050 / FS-11-050 | small |
+| 1/2" | 10 | FS-14-050 | FS-15-050 | medium |
+| 3/4" | 12 | FS-06-075 | FS-07-075 | small |
+| 3/4" | 25 | FS-10-075 / FS-14-075 | FS-11-075 / FS-15-075 | small / medium |
+| 1" | 35 | FS-10-100 / FS-14-100 | FS-11-100 / FS-15-100 | small / medium |
+| 1" | 55 | FS-18P-100 | FS-19P-100 | medium |
+| 1 1/4" | 70 | FS-18P-125 | FS-19P-125 | medium |
+| 1 1/2" | 85 | FS-18P-150 | FS-19P-150 | medium |
+| 2" | 135 | FS-30P-200 / FS-230P-200 | FS-31P-200 / FS-231P-200 | medium |
+| 2 1/2" | 195 | FS-30P-250 / FS-230P-250 | FS-31P-250 / FS-231P-250 | medium |
+| 3" | 300 | FS-230P-300 / FS-234P-300 / FS-274P-300 | FS-231P-300 / FS-235P-300 / FS-275P-300 | medium |
+| 4" | 520 | FS-234P-400 / FS-274P-400 | FS-235P-400 / FS-275P-400 | medium |
+| 5" | 800 | FS-244P-500 / FS-274P-500 | FS-245P-500 / FS-275P-500 | medium |
+| 6" | 1100 | FS-274P-600 | FS-275P-600 | medium |
 
-**Service trigger:** Solberg specifies element change-out at **15–20" H₂O over initial ΔP**. A cheap intake
-vacuum gauge or restriction indicator turns the filter PM from a calendar guess into a measurement.
+4"–6" are also available flanged (suffix **F**, e.g. FS-234P-400F).
 
----
+### Media choice — matters here
+
+| | Paper | Polyester |
+|---|---|---|
+| Efficiency | **99 %+ to 2 µm** | 99 %+ to **5 µm** (medium series) / **10 µm** (small stamped series) |
+| Moisture / oil / humidity | Degrades and blinds when damp | Handles it; **washable and reusable** |
+| Buddy's Kitchen call | Use if the compressor sits in a dry mechanical room | **Use if the intake sees kitchen humidity, steam or grease** |
+
+Both are enormously better than the MERV 6 pad (35 % @ 3 µm). Note the small stamped FS series polyester is
+10 µm, not 5 µm — only the medium series polyester is 5 µm.
+
+### Common specs (both series)
+- Continuous temp: −15 °F to 220 °F (−26 °C to 104 °C)
+- Filter change-out differential: **15–20" H₂O over initial ΔP**
+- Corrosion-resistant powder coat carbon steel; mounts vertically or horizontally
+- Stainless construction and a pressure-drop indicator are listed options on the medium series
+
+### Sizing rule
+1. **Thread first.** Match the compressor's actual inlet thread. Oversizing the filter and adapting *up* with a
+   nipple/bushing is fine and desirable; bushing *down* to a smaller filter is not.
+2. **Then CFM.** Filter SCFM rating ≥ compressor inlet/displacement CFM. Round up — a larger filter means lower
+   ΔP and a longer service interval.
+3. If only HP is known, estimate inlet CFM ≈ **5 × HP** and round up, then confirm against the nameplate.
+   Rough guide: 10 HP ≈ 50 CFM (FS-18P-100, 1"); 25 HP ≈ 125 CFM (FS-30P-200, 2"); 50 HP ≈ 250 CFM
+   (FS-230P-300, 3"). **VERIFY** against the actual nameplate before ordering.
 
 ## 6. Related items worth raising while the machine is new
 
@@ -147,8 +182,9 @@ vacuum gauge or restriction indicator turns the filter PM from a calendar guess 
 1. [ ] Check crate, parts bag and O&M parts list for a shipped-loose intake filter or a shipping plug (§3).
 2. [ ] Record nameplate data: make/model/serial, HP, inlet CFM, recip vs. screw, oil vs. oil-free (§4).
 3. [ ] Measure the inlet thread size and gender.
-4. [ ] Order the OEM intake filter against model/serial. If lead time is unacceptable, order a correctly sized
-       threaded filter-silencer as the interim — **not** the McMaster pad.
+4. [ ] Order a Solberg FS (or Donaldson/Nugent equivalent) sized off §5: thread match first, then SCFM ≥ inlet
+       CFM, paper element if the room is dry / polyester if it sees humidity or grease. **Not** the McMaster pad.
+       Order a spare element at the same time.
 5. [ ] Do not run the compressor with an unfiltered inlet in the meantime; if it must run, keep it short and
        document it.
 6. [ ] Add intake filter to the PM schedule; fit an intake restriction gauge and set change-out at
@@ -162,6 +198,9 @@ vacuum gauge or restriction indicator turns the filter PM from a calendar guess 
 
 ## 8. Sources
 - McMaster-Carr 2173K133 product listing (specs transcribed 2026-09-18) — https://www.mcmaster.com/2173K133/
+- **Solberg FS Series catalog, 1/4"–1" (sizing table, Rev US2506C2)** — https://www.solbergmfg.com/cdn/shop/files/US_FS-sm.pdf
+- **Solberg FS Series catalog, 1/2"–6" (sizing table, Rev US2506C2)** — https://www.solbergmfg.com/cdn/shop/files/US_FS-med.pdf
+- Solberg FS/PS Series overview — https://www.solbergmfg.com/collections/fs-ps-series
 - Solberg F/FT Series inlet filters (efficiency, temp range, change-out ΔP) — https://www.solbergmfg.com/collections/f-ft-series
 - Solberg polyester element ratings (99 %+ to 5 µm) — https://www.solbergmfg.com/collections/polyester-elements
 - Solberg 2-micron paper element — https://www.solbergmfg.com/products/14
