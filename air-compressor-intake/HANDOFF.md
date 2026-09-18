@@ -150,6 +150,53 @@ Both are enormously better than the MERV 6 pad (35 % @ 3 µm). Note the small st
    Rough guide: 10 HP ≈ 50 CFM (FS-18P-100, 1"); 25 HP ≈ 125 CFM (FS-30P-200, 2"); 50 HP ≈ 250 CFM
    (FS-230P-300, 3"). **VERIFY** against the actual nameplate before ordering.
 
+## 5b. Event log / decision taken
+
+- **2026-09-18** New compressor found with no intake filter. McMaster **2173K133** (MERV 6 fiberglass HVAC pad)
+  proposed as an interim, held on with magnets. Recommendation given: threaded filter-silencer per §5.
+- **2026-09-18** OEM filter confirmed not available and not on hand.
+- **2026-09-18** **Decision: proceed with cut-to-fit media for now.** Recommendation accordingly downgraded from
+  "do not do this" to "do this the least-bad way" — media changed from fiberglass to tackified polyester, plus
+  the mandatory mitigations below. The threaded filter-silencer (§5) remains the correct fix and stays on the
+  action list.
+
+### Interim cut-to-fit media — what to buy
+
+**Spec: MERV 8 tackified polyester, 1" thick. Not fiberglass.**
+
+| | McMaster 2173K133 (rejected) | MERV 8 tackified polyester |
+|---|---|---|
+| Media | Fiberglass, unpleated | Polyester, resin/thermally bonded |
+| Capture, 3–10 µm | 35–49 % (MERV 6) | 70–85 % (MERV 8) |
+| Fiber shedding | Sheds — adhesive-bonded loose fill | Does not flake or shed; no sharp edges |
+| Moisture / grease | Degrades | Good chemical and moisture resistance |
+| Tackifier | None | Yes — holds captured dust and its own fibers |
+
+Verified options (prices 2026-09-18, re-check):
+- **Amazon ASIN B017WOX62A** — MERV 8 tackified polyester media, 10 ft roll × 25" wide. **Preferred**: a roll
+  lets you cut any shape and double-layer. 24 ft version is ASIN B07NBRZPCC.
+- **Air Filter Hub** 12-pack MERV 8 super-tack antimicrobial polyester pads, 1" thick, $54.88; stock sizes
+  6×14×1 through 30×30×1.
+- McMaster equivalent exists under Filter Material / air filter rolls (filter to Material = Polyester,
+  MERV 8). **VERIFY** the part number on their site — mcmaster.com blocks automated reads, so no number is
+  recorded here rather than record a guessed one.
+
+### Mandatory mitigations if cut media is used
+
+1. **Backing screen on the downstream side.** Perforated metal or hardware cloth between the media and the
+   inlet. Without it the pad can be drawn into the intake — this is the difference between a mediocre filter
+   and a destroyed pump. Non-negotiable.
+2. **Clamp it, do not magnet it.** Band clamp, hose clamp or a cut retaining ring, sealed at the perimeter.
+   Magnets walk under vibration, and an unsealed edge means the air bypasses the media entirely.
+3. **Maximize face area.** Cut it as large as the mounting allows. Face velocity drives both shedding and ΔP;
+   doubling the area halves the velocity.
+4. **Tackified (orange) side faces the incoming dirty air.**
+5. **Inspect weekly.** It will load faster than expected, and a loaded pad raises inlet restriction, which costs
+   capacity and raises discharge temperature.
+6. **Set an expiry date on it.** This is a bridge to the §5 part, not the end state.
+
+---
+
 ## 6. Related items worth raising while the machine is new
 
 - **Intake air source drives capacity.** Compressor capacity scales with inlet air density, so warm intake air
@@ -185,8 +232,8 @@ Both are enormously better than the MERV 6 pad (35 % @ 3 µm). Note the small st
 4. [ ] Order a Solberg FS (or Donaldson/Nugent equivalent) sized off §5: thread match first, then SCFM ≥ inlet
        CFM, paper element if the room is dry / polyester if it sees humidity or grease. **Not** the McMaster pad.
        Order a spare element at the same time.
-5. [ ] Do not run the compressor with an unfiltered inlet in the meantime; if it must run, keep it short and
-       document it.
+5. [ ] Interim: fit MERV 8 tackified polyester cut media per §5b **with the backing screen and clamped,
+       sealed perimeter**. Do not run the compressor with a bare unfiltered inlet.
 6. [ ] Add intake filter to the PM schedule; fit an intake restriction gauge and set change-out at
        15–20" H₂O over initial.
 7. [ ] Confirm where the inlet draws from; evaluate ducting to cooler/cleaner air (§6).
@@ -205,6 +252,10 @@ Both are enormously better than the MERV 6 pad (35 % @ 3 µm). Note the small st
 - Solberg polyester element ratings (99 %+ to 5 µm) — https://www.solbergmfg.com/collections/polyester-elements
 - Solberg 2-micron paper element — https://www.solbergmfg.com/products/14
 - 3/4" NPT intake filter-silencer, $14.95, element FE-01X — https://compressor-source.com/products/3-4-npt-air-compressor-intake-filter-silencer-metal-housing-and-element
+- MERV 8 tackified polyester media roll, ASIN B017WOX62A — https://www.amazon.com/Filter-Media-Orange-Polyester-Tackifier/dp/B017WOX62A
+- Air Filter Hub MERV 8 super-tack polyester pads — https://www.airfilterhub.com/products/12-pack-antimicrobial-merv-8-super-tack-orange-white-polyester-air-filter-pads-1-thick
+- Permatron, nonwoven polyester media (does not flake or shed) — https://permatron.com/products/nonwoven-polyester-air-filter-media
+- Why switch from fiberglass to polyester (shedding) — https://www.sprayboothshop.com/blog/switch-from-fiberglass-to-polyester/
 - Donaldson, intake filter restriction vs. energy — https://www.donaldson.com/en-us/compressor/technical-articles/filter-ecosystem-energy-consumption/
 - ISO 8573-1 for food production — https://www.hengst.com/en/solutions/know-how/iso-8573-1-guide-to-the-quality-of-compressed-air-for-food-production
 - Food-safe compressed air standards (Atlas Copco) — https://www.atlascopco.com/en-us/compressors/industry-solutions/pneumatic-conveying-systems/compressed-air-standards-food-industry
