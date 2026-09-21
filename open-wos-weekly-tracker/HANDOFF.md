@@ -13,6 +13,7 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 | `build_fix.py` | Script that produced the fixed file from the original by editing the OOXML parts directly (keeps VBA, chart, table style byte-for-byte). |
 | `Open_WOs_simple.xlsx` | Two-tab version requested 2026-09-21: `Sheet1` (paste tab) + the original `Totals` page unchanged in layout. The 9/21/2026 block (D:E) counts from Sheet1 with COUNTIFS; the 9/15 block stays typed. No macro, so the date in E1 is typed. |
 | `Open_WOs_with_graph.xlsx` | Current version (2026-09-21, third request): `Sheet1` = the weekly-history chart page transplanted from the original workbook (table `WeeklyLog` + line chart, weeks 9/15 and 9/21 filled in); `Totals` = the user's page with the values they typed in Excel (9/21 block: 7, 6, 38, 241). No formulas count from an export; the user types the four counts each week. Built by `build_graph.py` from the original. |
+| `Open_WOs_auto.xlsx` | Current version (2026-09-21, fourth request): same two tabs, but the `WeeklyLog` table on `Sheet1` is all formulas that read the dated blocks on `Totals` (every 3 columns: A:B, D:E, G:H, J:K, M:N ...; a block counts when its date cell in row 1 is a real date). 26 rows pre-built; Tab in the last cell adds more. Chart names are dynamic (`INDEX():INDEX()` sized by `COUNT` of dates). Built by `build_auto.py`. Not opened in Excel here (LibreOffice cannot load files in the sandbox) — **VERIFY** in Excel that the table fills and the chart shows both weeks. |
 
 ## 2. How the workbook is meant to work
 
@@ -55,6 +56,11 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 - **2026-09-21** — User opened `Open_WOs_simple.xlsx` in Excel, typed 7/6/38/241 over the 9/21
   formulas, and asked for the chart page back on `Sheet1` with Totals values kept. Built
   `Open_WOs_with_graph.xlsx`. The export-counting idea is dropped: the user prefers typing.
+
+- **2026-09-21** — User asked for the chart to update from the Totals page automatically. Built
+  `Open_WOs_auto.xlsx`: table rows find the k-th dated block with `_xlfn.AGGREGATE(15,6,...)` over
+  `Totals!$A$1:$ZZ$1` and pull rows 1/4/5/9/10 of that block with INDEX. Weekly routine is now:
+  copy a block on Totals, paste it 3 columns to the right, type the date and four counts.
 
 ## 4. Changes made on 2026-09-21
 
