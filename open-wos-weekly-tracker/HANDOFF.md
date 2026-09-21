@@ -14,7 +14,7 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 | `Open_WOs_simple.xlsx` | Two-tab version requested 2026-09-21: `Sheet1` (paste tab) + the original `Totals` page unchanged in layout. The 9/21/2026 block (D:E) counts from Sheet1 with COUNTIFS; the 9/15 block stays typed. No macro, so the date in E1 is typed. |
 | `Open_WOs_with_graph.xlsx` | Current version (2026-09-21, third request): `Sheet1` = the weekly-history chart page transplanted from the original workbook (table `WeeklyLog` + line chart, weeks 9/15 and 9/21 filled in); `Totals` = the user's page with the values they typed in Excel (9/21 block: 7, 6, 38, 241). No formulas count from an export; the user types the four counts each week. Built by `build_graph.py` from the original. |
 | `Open_WOs_auto.xlsx` | Current version (2026-09-21, fourth request): same two tabs, but the `WeeklyLog` table on `Sheet1` is all formulas that read the dated blocks on `Totals` (every 3 columns: A:B, D:E, G:H, J:K, M:N ...; a block counts when its date cell in row 1 is a real date). 26 rows pre-built; Tab in the last cell adds more. Chart names are dynamic (`INDEX():INDEX()` sized by `COUNT` of dates). Built by `build_auto.py`. Not opened in Excel here (LibreOffice cannot load files in the sandbox) — **VERIFY** in Excel that the table fills and the chart shows both weeks. |
-| `Open_WOs_tracker.xlsx` | Current version (2026-09-21, fifth request; user confirmed the auto-updating chart works in Excel). Adds empty blocks in G:H (next week) and J:K (the week after), removes the header-only leftover block in M:N, sets label-column widths for future blocks, and adds three conditional formats that turn a block's empty date/count cells yellow until filled (`ISBLANK` + column-stride check + header in row 3). Two-line how-to in Totals rows 16–17 naming Aptean EAM > Open Work Orders. Built by `build_tracker.py`. |
+| `Open_WOs_tracker.xlsx` | Current version (2026-09-21, fifth request; user confirmed the auto-updating chart works in Excel). Adds empty blocks in G:H, J:K and M:N (the next three weeks), removes the header-only leftover block in M:N, sets label-column widths for future blocks, and adds three conditional formats that turn a block's empty date/count cells yellow until filled (`ISBLANK` + column-stride check + header in row 3). Two-line how-to in Totals rows 16–17 naming Aptean EAM > Open Work Orders. Built by `build_tracker.py`. |
 
 ## 2. How the workbook is meant to work
 
@@ -69,6 +69,8 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 
 - **2026-09-21** — User asked for one more empty block → `Open_WOs_tracker.xlsx` now has G:H and J:K
   ready (12 merges, dimension A1:K17). Same build script.
+
+- **2026-09-21** — One more empty block requested → M:N added (15 merges, dimension A1:N17).
 
 ## 4. Changes made on 2026-09-21
 

@@ -167,12 +167,24 @@ add(10, '<c r="J10" s="5"/><c r="K10" s="6" t="s"><v>3</v></c>')
 add(11, '<c r="J11" s="5"><f>SUM(J9+J10)</f><v>0</v></c><c r="K11" s="6" t="s"><v>4</v></c>')
 add(13, '<c r="J13" s="44" t="s"><v>6</v></c><c r="K13" s="44"/>')
 add(14, '<c r="J14" s="5"><f>SUM(J6+J11)</f><v>0</v></c><c r="K14" s="6" t="s"><v>7</v></c>')
+add(1,  '<c r="M1" s="7" t="s"><v>0</v></c><c r="N1" s="8"/>')
+add(2,  '<c r="M2" s="16"/><c r="N2" s="17"/>')
+add(3,  '<c r="M3" s="42" t="s"><v>1</v></c><c r="N3" s="42"/>')
+add(4,  '<c r="M4" s="5"/><c r="N4" s="6" t="s"><v>2</v></c>')
+add(5,  '<c r="M5" s="5"/><c r="N5" s="6" t="s"><v>3</v></c>')
+add(6,  '<c r="M6" s="5"><f>SUM(M4+M5)</f><v>0</v></c><c r="N6" s="6" t="s"><v>4</v></c>')
+add(8,  '<c r="M8" s="43" t="s"><v>5</v></c><c r="N8" s="43"/>')
+add(9,  '<c r="M9" s="5"/><c r="N9" s="6" t="s"><v>2</v></c>')
+add(10, '<c r="M10" s="5"/><c r="N10" s="6" t="s"><v>3</v></c>')
+add(11, '<c r="M11" s="5"><f>SUM(M9+M10)</f><v>0</v></c><c r="N11" s="6" t="s"><v>4</v></c>')
+add(13, '<c r="M13" s="44" t="s"><v>6</v></c><c r="N13" s="44"/>')
+add(14, '<c r="M14" s="5"><f>SUM(M6+M11)</f><v>0</v></c><c r="N14" s="6" t="s"><v>7</v></c>')
 note1 = "Yellow cells = type this week's numbers here, from Aptean EAM > Open Work Orders: the date, then repair tickets and PMs for each plant."
-note2 = "When the empty blocks are used up: copy the newest block (for example J1:K14), paste it 3 columns to the right (M1), and fill in the yellow cells. The chart on Sheet1 updates by itself."
+note2 = "When the empty blocks are used up: copy the newest block (for example M1:N14), paste it 3 columns to the right (P1), and fill in the yellow cells. The chart on Sheet1 updates by itself."
 s1 = sub1(s1, r'<row r="16"[^>]*>.*?</row>', f'<row r="16"><c r="A16" s="31" t="inlineStr"><is><t>{escape(note1)}</t></is></c></row>', flags=re.S)
 s1 = sub1(s1, r'<row r="17"[^>]*>.*?</row>', f'<row r="17"><c r="A17" s="31" t="inlineStr"><is><t>{escape(note2)}</t></is></c></row>', flags=re.S)
 s1 = re.sub(r'<row r="(1[89]|2[01])"[^>]*>.*?</row>', '', s1, flags=re.S)
-s1 = sub1(s1, r'<dimension ref="A1:N21"/>', '<dimension ref="A1:K17"/>')
+s1 = sub1(s1, r'<dimension ref="A1:N21"/>', '<dimension ref="A1:N17"/>')
 cols = ['<col min="1" max="1" width="10.7109375" style="3" customWidth="1"/>', '<col min="2" max="2" width="35.140625" style="4" customWidth="1"/>']
 for c in range(3, 91):   # label column of every block (E, H, K, ...) gets the same width as E
     w = '27' if c % 3 == 2 else '9.140625'
@@ -180,7 +192,7 @@ for c in range(3, 91):   # label column of every block (E, H, K, ...) gets the s
 cols.append('<col min="91" max="16384" width="9.140625" style="4"/>')
 s1 = sub1(s1, r'<cols>.*?</cols>', '<cols>' + ''.join(cols) + '</cols>', flags=re.S)
 s1 = sub1(s1, r'<mergeCells count="9">.*?</mergeCells>',
-    '<mergeCells count="12">' + ''.join(f'<mergeCell ref="{m}"/>' for m in ('A3:B3','A8:B8','A13:B13','D3:E3','D8:E8','D13:E13','G3:H3','G8:H8','G13:H13','J3:K3','J8:K8','J13:K13')) + '</mergeCells>', flags=re.S)
+    '<mergeCells count="15">' + ''.join(f'<mergeCell ref="{m}"/>' for m in ('A3:B3','A8:B8','A13:B13','D3:E3','D8:E8','D13:E13','G3:H3','G8:H8','G13:H13','J3:K3','J8:K8','J13:K13','M3:N3','M8:N8','M13:N13')) + '</mergeCells>', flags=re.S)
 cf = ('<conditionalFormatting sqref="A1:ZZ1"><cfRule type="expression" dxfId="18" priority="1"><formula>AND(ISBLANK(A1),MOD(COLUMN(A1)-2,3)=0,INDEX($3:$3,1,COLUMN(A1)-1)&lt;&gt;"")</formula></cfRule></conditionalFormatting>'
       '<conditionalFormatting sqref="A4:ZZ5"><cfRule type="expression" dxfId="18" priority="2"><formula>AND(ISBLANK(A4),MOD(COLUMN(A4)-1,3)=0,INDEX($3:$3,1,COLUMN(A4))&lt;&gt;"")</formula></cfRule></conditionalFormatting>'
       '<conditionalFormatting sqref="A9:ZZ10"><cfRule type="expression" dxfId="18" priority="3"><formula>AND(ISBLANK(A9),MOD(COLUMN(A9)-1,3)=0,INDEX($3:$3,1,COLUMN(A9))&lt;&gt;"")</formula></cfRule></conditionalFormatting>')
