@@ -8,7 +8,7 @@ directory with a `HANDOFF.md` as its living record.
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
-| `lbc-lro-2g-oven/` | LBC LRO-2G5 rack oven, will not reach set point (plateaus ~410 °F) | Open — diagnosis not yet run; see its `HANDOFF.md` §7 |
+| `lbc-lro-2g-oven/` | LBC LRO-2G5 rack oven, intermittently will not reach set point (plateaus ~410 °F) | Open — recovered on its own 2026-09-21, cause not established; see its `HANDOFF.md` §8 |
 
 ## Conventions
 

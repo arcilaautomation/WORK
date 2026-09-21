@@ -5,6 +5,10 @@ Purpose: project memory for Claude Code. Everything below came from the LBC OEM 
 factory schematic set (DWG 61111-174-4), and the Fenwal control datasheet. Items marked **VERIFY**
 are unconfirmed and must be checked on the machine.
 
+**Status 2026-09-21: the oven recovered on its own and is baking normally.** The fault is therefore
+**intermittent and self-clearing**, which is a finding in itself — see §3. Two control settings on this oven
+are confirmed and are the leading explanations; neither is a hardware failure. Do not close this out.
+
 **Nothing here authorizes work on a running machine.** The heat circuit is live 120 VAC, the gas train is
 live, and the chamber runs to 525 °F. Follow site LOTO. Gas pressure, manifold pressure, combustion and
 CO testing are the work of a qualified gas technician — LBC requires factory-authorized start-up and
@@ -18,6 +22,8 @@ and adjustment, and thermostat calibration after the first 30 days, are explicit
 | Item | Value | Source |
 |---|---|---|
 | Model | LBC Bakery Equipment **LRO-2G5**, double rack oven, gas | Spec sheet LRO-2G5 (2/19) |
+| Control | **−70 digital control** — confirmed 2026-09-21 by Johnathan. Board **40102-70** | Install/Service p.32; confirmed on machine |
+| Temperature sensor | **K-type thermocouple, P/N 41100-42** (the −70 uses a TC, not the touchscreen's RTD) | Install/Service p.32 |
 | Input rate | **290 kBTU/hr** natural gas | Install/Service p.7 |
 | Burner | In-shot burners, single-stage on/off, hot surface igniter | Parts list p.42; schematic sheet 4 |
 | Gas supply pressure | **NG 5" wc min / 14" wc max**; propane 10"/14" wc | Install/Service p.7, p.23 |
@@ -46,62 +52,119 @@ and adjustment, and thermostat calibration after the first 30 days, are explicit
 | Over-limit (hi limit) | 30707-06 |
 | Overload relay, 208–240 V blower motor | 30707-03 (480 V: 30707-02; 1-ph: 30707-05) |
 | Contactor, blower motor | 30700-15 |
-| Thermocouple, −70 digital control | 41100-42 |
-| RTD temp sensor / K-type TC, Android touchscreen control | 41100-33 / 41100-42a |
-
-**VERIFY** which control this oven has: **−70 digital**, **−54**, or **Android touchscreen (−100)**. It changes the
-temperature sensor type (−70 = K-type thermocouple 41100-42; touchscreen = RTD 41100-33) and the
-parameter names. The Install/Service start-up form lists −70 parameters as Sb, St, id, IL, PL, tP, T4, t5, t6
-and −54 parameters as Temp offset, 1K Probe Cal, Serial/IR, Lock Feature, Temp Scale, AEMS, Set Back,
-SB Temp, SB Delay (p.27).
+| Circuit board, −70 digital control | 40102-70 |
+| Thermocouple, −70 control | 41100-42 |
 
 ---
 
-## 2. Symptom as reported (2026-09-21)
+## 2. Symptom as reported
 
-Set point commanded to 475 °F. Oven **plateaus near 410 °F and then falls away**. Reported as "not heating."
+- **2026-09-21, reported.** Set point commanded to 475 °F. Oven **plateaus near 410 °F and then falls away**.
+- **2026-09-21, later.** *"It went back to normal."* No repair was performed. The oven recovered on its own.
 
-Not yet established — see §6:
-- whether the burner is still firing while the temperature falls,
-- whether 410 °F is the *real* chamber temperature or only the displayed one,
-- whether the oven ever held 475 °F.
-
----
-
-## 3. What the symptom already tells us
-
-The burner on this oven is **single-stage on/off** — the Fenwal energizes the gas valve or it does not; there is
-no modulation to be stuck on low (schematic sheet 4). So a steady plateau below set point means one of
-exactly two things, and separating them is the whole job:
-
-**Family A — the burner is firing, but the oven cannot hold 475 °F.** Heat input equals heat loss at ~410 °F.
-Causes are underfiring (gas pressure, orifices, partially lit burner), heat not reaching the chamber
-(circulation blower, fouled heat exchanger), or excess loss (vent damper open, door seal, steam water,
-over-exhausting hood).
-
-**Family B — the burner is cutting out.** The oven climbs, an interlock or the flame-safety control drops the
-gas valve, and the chamber coasts down. The control still shows a call for heat, so it "looks like" it is trying.
-
-The reported "**and drops**" leans toward **Family B**, because in Family A the oven normally sits at its
-equilibrium temperature rather than falling away from it. But a rising loss (door openings, a load going in,
-steam) will also pull a Family A oven down, so this is a lean, not a conclusion.
-
-### The decisive signature for Family B
-
-The Fenwal 35-65 is a **3-try** control with a **1-hour auto-reset**: after three failed trials for ignition it locks
-out, and if the thermostat is still calling for heat it **automatically resets and retries after one hour**
-(Fenwal datasheet p.2). So — *if the oven goes cold for roughly an hour and then fires again on its own,
-that is a lockout, full stop.* That single observation would close out the diagnosis.
+Not yet established — see §7:
+- how long it was down, and **what changed at the moment it recovered**,
+- where the temperature bottomed out before it came back (the sharpest single discriminator — see §4),
+- whether the burner was still firing while the temperature fell,
+- whether 410 °F was the real chamber temperature or only the displayed one.
 
 ---
 
-## 4. The heat interlock chain — the best diagnostic on this machine
+## 3. What the symptom tells us
 
-From LBC schematic **sheet 4, DWG 61111-174-4** ("Schematic, Rack Oven w/ Android Control"). The heat
-call passes through a series string of interlocks, and **each node lights an indicator lamp**. The Operators
-manual (p.28) says it plainly: *"The heat sequence lights will turn on in sequence when the thermostat
-control turns the heat on. If a light does not turn on, it indicates a fault that will not allow the oven to heat."*
-The lights are on the left side of the control box and are visible with no covers removed.
+The burner on this oven is **single-stage on/off** — the Fenwal energizes the gas valve or it does not; there
+is no modulating valve to be stuck on low fire (schematic sheet 4). So a plateau below set point is either
+underfiring / excess heat loss, or the burner cutting out.
+
+**The self-recovery is the most informative fact we have.** It rules out anything that would need a hand on
+the machine to clear: wrong orifices, a fouled heat exchanger, a mechanically stuck damper, a failed
+thermocouple. Those do not fix themselves. What is left divides into two groups:
+
+**Group 1 — a setting, not a fault.** The oven did exactly what it was told. Both confirmed settings on this
+oven (§4) sit in this group, and both "recover" the moment the operating conditions change.
+
+**Group 2 — a genuine intermittent that self-clears on a timer or a thermal reset.** Fenwal lockout with its
+1-hour auto-reset; the circulation blower overload OL1 cooling and re-closing; an auto-reset hi limit; or gas
+supply pressure recovering when other equipment on the line shuts off.
+
+Group 1 is far more likely given what we know, and costs nothing to check. But Group 2 must be excluded,
+because a self-clearing hardware fault always comes back — usually mid-production.
+
+---
+
+## 4. Two confirmed control settings — the leading explanations
+
+### 4a. Vent is set to OPEN — confirmed 2026-09-21
+
+Per the Operators manual (p.32) and the LMO Max operator manual (p.16), the vent has three settings:
+
+| Setting | Behavior |
+|---|---|
+| **OPEN** | Vent **open for the whole bake**, except while the steam timer is counting down |
+| **AUTO** | Closed for the first third of the bake, **open for the last third** |
+| **CLOSED** | Closed for the entire bake |
+
+**OPEN is a continuous heat-loss path for the entire bake.** It is the normal setting only for products that
+want a dry chamber throughout; for most bread work **AUTO** is the intended setting, because venting
+belongs at the end of the bake for crust, not at the start. An oven venting continuously will settle at a lower
+equilibrium temperature than one that is closed — which is exactly the shape of "climbs, then sits below
+set point."
+
+This also gives a clean recovery mechanism: **vent is a per-recipe setting**, so selecting a different recipe
+whose vent is CLOSED or AUTO would make the oven "go back to normal" with nobody touching anything.
+
+> Note: the vent function is **locked out if the control has the programming limitation feature turned on**
+> (Operators manual p.32). If the setting cannot be changed at the panel, that is why. **VERIFY** which −70
+> parameter carries that lock — `PL` is the plausible candidate in the start-up form's parameter list but is
+> not confirmed.
+
+### 4b. Automatic Temperature Setback — on the −70 control
+
+The −70 control has a **Temperature Setback** feature: *"If the oven is left unattended for a period of time,
+the control can adjust the temperature set point to a lower setting to conserve energy"*
+(LMO Max Operator's Manual Rev B 8-16, p.17 — same 40102-70 control family; the LRO-2G5 spec sheet
+lists "Selectable Automatic Temperature Setback" as a standard control feature).
+
+| Parameter | Meaning | Range |
+|---|---|---|
+| **`Sb`** | Set Back on / off | `ON` / `OF` |
+| **`St`** | Setback **temperature** | **180 – 300 °F** (displayed in tens: `18` = 180 °F) |
+| **`id`** | Setback **delay** — how long unattended before setback occurs | **20 – 120 minutes** |
+
+These are the first three entries in the −70 column of LBC's start-up form (Install/Service p.27), which lists
+`Sb, St, id, IL, PL, tP, T4, t5, t6, t7, t8, t9, P9, T-Offset`.
+
+**To read or change them** (LMO Max Operator's Manual p.17):
+1. Turn the control **off**.
+2. **Press and hold the F/C button** until the display illuminates. Keep holding it.
+3. Press the **time adjust** button to step the time display through `SB` → `St` → `Id`.
+4. Press the **steam adjust** button to change the displayed value.
+
+Setback explains the self-recovery perfectly: it engages after 20–120 minutes of the oven sitting unattended,
+and releases as soon as the oven is used again — so the oven would appear to "fix itself" the moment
+somebody started a bake or opened the door.
+
+### The discriminator between 4a and 4b
+
+**Setback cannot hold the oven at 410 °F — its maximum setback temperature is 300 °F.** So:
+
+- If the temperature kept falling past 410 and **settled somewhere in the 180–300 °F band**, that is
+  **setback**, and the oven was never faulty.
+- If it **hung at ~410 °F** and stayed there, setback is ruled out, and the vent (or a capacity/interlock
+  problem) is in play.
+
+410 °F is above the setback ceiling, so on the reported numbers alone the oven was most likely *on its way
+down* when it was observed — but that needs the bottom-out figure to confirm. Ask the operator who saw it.
+
+---
+
+## 5. The heat interlock chain — the best diagnostic when it recurs
+
+From LBC schematic **sheet 4, DWG 61111-174-4**. The heat call passes through a series string of interlocks,
+and **each node lights an indicator lamp**. The Operators manual (p.28) says it plainly: *"The heat sequence
+lights will turn on in sequence when the thermostat control turns the heat on. If a light does not turn on, it
+indicates a fault that will not allow the oven to heat."* The lights are on the left side of the control box and
+are visible with no covers removed.
 
 ```
 Control "Heat" output (wire 47)
@@ -127,16 +190,19 @@ so the control itself knows whether the gas valve is energized (schematic sheet 
 
 | What you see | What it means |
 |---|---|
-| Thermostat light OFF | The control is not calling for heat. Set point, sensor reading, or a setback/recipe feature — go to §5 test 3. |
-| Thermostat ON, Hood/High Limit light OFF | **Hi Limit tripped.** The chamber is hotter than the display says, or the limit has failed. Strongly implies a sensor/calibration fault. |
-| Hood/High Limit ON, Draft Blower light OFF | Hood airflow switch or draft blower airflow switch not proving. Loaded hood filters, slipping rooftop fan belt, weak draft blower, or a cracked/condensate-plugged sensor hose. |
+| Thermostat light OFF | The control is **not calling for heat** — this is what **setback** looks like (§4b), or a recipe/set-point issue. |
+| Thermostat ON, Hood/High Limit light OFF | **Hi Limit tripped.** The chamber is hotter than the display says — implies a sensor/calibration fault. |
+| Hood/High Limit ON, Draft Blower light OFF | Hood airflow or draft blower airflow switch not proving. Loaded hood filters, slipping rooftop fan belt, weak draft blower, or a cracked/condensate-plugged sensor hose. |
 | Draft Blower ON, Circ. Blower light OFF | MR1 dropped — **circulation blower overload OL1 tripped** (auto-resets when cool → oven recovers, then drops again). |
 | All four lights ON, no flame | Fenwal problem: flame sense, igniter, gas valve, or gas supply. Read the Fenwal LED. |
 
+Note the first row: **if the thermostat light is off while the display sits below set point, the control is not
+even asking for heat** — which points straight at §4b rather than at anything in the gas train.
+
 **VERIFY** this light-to-node mapping against the schematic in this oven's own control compartment. The
-sheet above is the Android-control drawing; the −70 and −100 controls share the drawing set (sheet 3
-references both) but confirm the lamp labels physically. The label "Hood/High Limit Light" is ambiguous —
-on the drawing its lamp sits on wire 48, *after* the Hi Limit and *before* the hood air-flow switch.
+manual's sheet 4 is titled for the Android control; the drawing set covers the −70 as well (sheet 3 references
+both), but confirm the lamp labels physically. The label "Hood/High Limit Light" is ambiguous — on the
+drawing its lamp sits on wire 48, *after* the Hi Limit and *before* the hood air-flow switch.
 
 ### Fenwal 35-65 LED codes (Fenwal datasheet p.2)
 
@@ -152,143 +218,149 @@ current to keep the system out of lockout is **1 µA**, measured with a DC micro
 **FC+ / FC−** test pins — *"meter should read 1 microamp or higher."* The LBC start-up form has a line for
 exactly this: *"Check sensor microamps or voltage at Fenwal"* (Install/Service p.27).
 
-Also from the Fenwal datasheet: if the **airflow signal is lost while the burner is firing**, the control
-immediately de-energizes the gas valve and signals an airflow fault. And if **flame is lost while running**,
-the control retries immediately and makes 2 more attempts before locking out.
+**The 1-hour signature:** the Fenwal is a **3-try** control with a **1-hour auto-reset** — after three failed trials
+for ignition it locks out, and if the thermostat is still calling for heat it automatically resets and retries after
+one hour (Fenwal datasheet p.2). *An oven that goes cold, sits for about an hour with nobody touching it,
+and then fires again on its own is a lockout.* Also: if the airflow signal is lost while the burner is firing, the
+control immediately de-energizes the gas valve; if flame is lost while running, it retries immediately and
+makes 2 more attempts before locking out.
 
 ---
 
-## 5. Diagnostic sequence
+## 6. Diagnostic sequence
 
-Ordered by information-per-minute. Tests 1–3 need no tools and no covers off.
+### Now, while the oven is running normally — free, no tools
 
-### Test 1 — Watch the heat sequence lights as it falls (no tools, 10 minutes)
-Bring the oven to the plateau, then watch the four lights while the temperature drops. Use the table in §4.
-This is the single test that splits Family A from Family B and localizes Family B to one component.
+**Test A — read the setback parameters.** Follow the F/C-button procedure in §4b and write down `Sb`, `St`
+and `id`. If `Sb` = ON, note the values. Compare against the original start-up form if it can be found.
+This either confirms or eliminates the leading hypothesis in five minutes.
 
-### Test 2 — Is the burner actually firing at the plateau?
-Look/listen at the burner compartment and confirm the gas valve is energized when the display sits at 410 °F.
-Firing but not climbing → Family A. Not firing while the thermostat light is on → Family B.
+**Test B — check the vent setting on every recipe in use**, not just the one that was running. Confirm which
+recipes are set OPEN and whether that is deliberate for that product. For most bread work the intended
+setting is AUTO.
 
-### Test 3 — Is 410 °F real? (independent thermometer)
-Put a calibrated probe or oven thermometer in the chamber and compare to the display.
-- **Chamber really at ~410 °F** → genuine heat shortfall, Family A.
-- **Chamber much hotter than 410 °F** → the sensor or its calibration is lying, the burner is over-running, and
-  the Hi Limit is almost certainly what is cutting the heat. On a −70 control the sensor is a K-type
-  thermocouple (41100-42); an aged or reversed-polarity thermocouple, a wrong extension lead, or a control
-  offset all read low. Check the −54 "Temp offset" / "1K Probe Cal" or the −70 parameters against the
-  commissioning values on the start-up form.
+**Test C — watch it hold 475 °F empty for an hour**, deliberately leaving it unattended past the `id` delay.
+If it walks down to the `St` value on schedule, the case is closed and nothing is broken.
 
-### Test 4 — Gas supply pressure, static and running (qualified gas tech, manometer)
-The LBC start-up form takes both readings for a reason (Install/Service p.26–27): *"Gas Supply-side Pressure
-(Inches WC)"* and *"Supply side gas pressure when burner is running."*
-- Supply must stay **≥ 5" wc NG while the burner is firing**. A reading that is fine at rest and sags under fire
-  means an undersized or shared line, a regulator at capacity, or a partially closed valve.
-- **Watch what else is on the same line.** If the oven holds 475 °F alone but falls back to ~410 °F when the
-  second oven / proofer / boiler fires, that is supply droop and it is a piping problem, not an oven problem.
-- Manifold pressure should be **3.5" wc on NG** — and confirm against the tag on the valve.
-- Never apply more than 14" wc to the gas valve (Install/Service, NOTICE p.17).
+### When it recurs — catch it in the act
 
-### Test 5 — Orifices and gas type
-Confirm the data plate gas type against the orifices actually fitted: **#45 for natural gas, #55 for propane**.
-Propane orifices on a natural-gas supply would badly underfire the oven and would produce exactly this
-plateau. Worth two minutes if the oven was ever converted or a manifold was ever replaced.
+**Test 1 — the heat sequence lights** (§5). The single test that localizes the fault. Start with the thermostat
+light: on or off tells you immediately whether this is a control decision or a heat-train failure.
 
-### Test 6 — Rate-of-rise benchmark
-LBC's own commissioning test: *"Set to 300 F. Minutes to go from 150 to 250 F"* (Install/Service p.27).
-Run it and record the number. It turns "seems slow" into a figure you can compare against this oven's
-start-up form and against the sister oven. **VERIFY** — retrieve the original start-up form for the target value.
+**Test 2 — is the burner firing at the plateau?** Confirm the gas valve is energized when the display sits low.
 
-### Test 7 — Heat-loss path check (Family A)
-- **Vent damper.** The recipe's vent setting has three options: **OPEN** (vent open the whole bake),
-  **AUTO** (opens for the last third), **CLOSED** (Operators manual p.32). A recipe left on OPEN, or a damper
-  stuck open mechanically, bleeds heat continuously. Check the commanded setting *and* the actual damper.
-- **Steam solenoid weeping.** A steam valve passing water continuously is a large, constant heat sink and
-  will hold the chamber below set point. Tell-tale: hot water running at the drain when no steam was called.
-- **Door seal and bottom sweep.** Start-up form checks the latch-side and top door gaps are even within 1/8",
-  and that the floor sweep lowers and seals (Install/Service p.26).
-- **Hood over-exhausting / make-up air.** The integrated hood is 800 CFM. Too much exhaust, or not enough
-  make-up air in the room, hurts both heat retention and combustion.
+**Test 3 — is the displayed temperature real?** Independent thermometer in the chamber vs. the display.
+The −70 uses a **K-type thermocouple (41100-42)**; a drifted TC, reversed polarity, or a wrong extension lead
+reads low, which would make the oven over-run and trip the hi limit. The −70 parameter **`T-Offset`** is the
+calibration trim — record it before changing anything.
 
-### Test 8 — Air side (Family A)
-- **Circulation blower rotation must be CCW viewed from the top** (Install/Service p.26). If the motor or its
-  supply was ever re-landed and two phases swapped, rotation reverses and heat transfer collapses while
-  everything still "runs." The schematic even shows an *optional circulation fan direction sensor* (sheet 3),
-  which tells you LBC considers this a live failure mode.
-- **Air shutter settings.** LRO-2G5 shutter gaps and angles are tabulated per row (rear 94°, middle 90°,
-  front 100 (85)°) on Install/Service p.29 — measured with LBC's spacing and angle tools.
-- **Draft blower, heat exchanger, flue.** Soot or fouling in the linear counterflow heat exchanger
-  (weldment 160-1329-20A) or a restricted flue cuts transfer *and* makes the draft airflow switch marginal —
-  and flue resistance rises as the oven gets hotter, which fits a fault that appears only near the top of the range.
+**Test 4 — where does it bottom out?** The 180–300 °F band means setback; hanging at ~410 °F does not (§4).
 
-### Test 9 — Combustion test (qualified tech only)
-Start-up form: set 350 °F, fire one minute, measure **CO in PPM**, photograph the reading, and check flame
-sensor microamps at the Fenwal (Install/Service p.27). A sooting or oxygen-starved burner shows up here.
-**A cracked heat exchanger or a CO problem is a stop-work condition, not a performance note.**
+### Gas side — qualified gas technician only
 
-### Test 10 — Back-up control bypass
-The oven has back-up controls: set the electronic control off, "Lights & Rotation" on, "Heat & Blower" on,
-and turn the back-up dial thermostat up — note the dial is **graduated in °C** (Operators manual p.29).
-If the oven makes full heat on the back-up thermostat but not on the digital control, the fault is in the
-control / sensor / set point, not in the gas train.
+**Test 5 — supply pressure, static *and* running.** LBC's start-up form takes both (Install/Service p.26–27).
+Supply must stay **≥ 5" wc NG while the burner fires**. Fine at rest but sagging under fire = undersized or
+shared line, or a regulator at capacity. **Check what else is on the line** — if the oven holds 475 °F alone but
+falls back when the second oven / proofer / boiler fires, that is supply droop and it is a piping problem.
+Manifold should be **3.5" wc NG**; confirm against the tag on the valve. Never apply more than 14" wc to the
+gas valve (Install/Service NOTICE p.17).
+
+**Test 6 — orifices vs. data plate gas type.** **#45 natural / #55 propane.** Propane orifices on natural gas
+would badly underfire the oven. Two minutes to check if the oven was ever converted or a manifold replaced.
+
+**Test 7 — combustion.** Set 350 °F, fire one minute, measure **CO in PPM**, and check flame sensor
+microamps at the Fenwal FC+/FC− pins (Install/Service p.27). **A cracked heat exchanger or a CO problem is
+a stop-work condition, not a performance note.**
+
+### Capacity and loss, if the oven genuinely cannot make 475 °F
+
+**Test 8 — rate-of-rise benchmark.** LBC's own commissioning test: *"Set to 300 F. Minutes to go from 150 to
+250 F"* (Install/Service p.27). Turns "seems slow" into a number comparable against the start-up form and
+against any sister oven. **VERIFY** — retrieve the original start-up form for the target value.
+
+**Test 9 — heat-loss paths.** Damper actually moving (not just commanded); steam solenoid weeping water
+(hot water at the drain with no steam called = a large constant heat sink); door gaps even within 1/8" and
+floor sweep sealing (Install/Service p.26); hood over-exhausting or room short of make-up air.
+
+**Test 10 — air side.** **Circulation blower rotation must be CCW viewed from the top** (Install/Service p.26) —
+if the motor supply was ever re-landed with two phases swapped, rotation reverses and heat transfer
+collapses while everything still "runs." LBC offers an *optional circulation fan direction sensor* (schematic
+sheet 3), which tells you they consider this a live failure mode. Air shutter gaps and angles per row are
+tabulated on Install/Service p.29 (rear 94°, middle 90°, front 100 (85)°).
+
+**Test 11 — back-up control bypass.** Electronic control off, "Lights & Rotation" on, "Heat & Blower" on,
+back-up dial thermostat up — the dial is **graduated in °C** (Operators manual p.29). Full heat on the back-up
+thermostat but not on the digital control puts the fault in the control / sensor / set point, not the gas train.
 
 ---
 
-## 6. Open questions — answer these first
+## 7. Open questions
 
-1. **Which control** is fitted: −70 digital, −54, or Android touchscreen? (§1)
-2. **Has this oven ever held 475 °F?** Or has it always topped out lower? Gradual decline or sudden onset?
-3. **What do the heat sequence lights do when the temperature falls?** (Test 1 — highest value)
-4. **Is the burner firing at the 410 °F plateau?** (Test 2)
-5. **Does it fail only when other gas equipment runs** — second oven, proofer, boiler? (Test 4)
-6. **Empty or loaded? With steam or without?** Does it hold better empty?
-7. **Recipe settings:** vent OPEN / AUTO / CLOSED, blower ON / PULSE / DELAY?
-8. **Does it come back to life roughly an hour after going cold?** (Fenwal lockout signature, §3)
-9. **Natural gas or propane** per the data plate — and which orifices are actually in the manifold?
-10. Any **yellow flame, soot, combustion smell, or CO alarm**? Any hot water at the drain when idle?
-11. Is there a **sister LRO** on site to compare readings against? Is the original **start-up form** on file?
+1. **How long was the oven down before it went back to normal?** ~1 hour unattended → Fenwal lockout (§5).
+2. **What changed at the moment it recovered?** This is the decisive question:
+   - recovered when someone **started a bake or opened the door** → **setback** (§4b)
+   - recovered when a **different recipe was selected** → **vent OPEN** (§4a)
+   - recovered **on its own after ~an hour**, nobody touching it → **Fenwal lockout auto-reset**
+   - recovered when **other gas equipment shut off** → **gas supply droop** (Test 5)
+3. **How low did it actually go?** 180–300 °F = setback. Stuck at ~410 °F = not setback.
+4. **Was the oven idle or actively baking** when it was seen at 410 °F?
+5. What are `Sb`, `St`, `id` set to? (Test A)
+6. Has this oven **ever** held 475 °F? Sudden onset or gradual decline?
+7. Is OPEN vent deliberate for the product being run, or a recipe that was never corrected?
+8. Any yellow flame, soot, combustion smell, or CO alarm? Hot water at the drain when idle?
+9. Natural gas or propane per the data plate — and which orifices are actually fitted?
+10. Is there a **sister LRO** on site to compare against? Is the original **start-up form** on file?
 
 ---
 
-## 7. Action list
+## 8. Action list
 
-1. [ ] Run Test 1 (heat sequence lights at the moment of the drop) and Test 2 (burner firing?). Record which
-       light drops out — that alone selects the branch.
-2. [ ] Run Test 3 (independent thermometer vs. display). Settles whether the sensor is lying.
-3. [ ] Check the recipe vent setting and the damper, and check the drain for a weeping steam solenoid (Test 7).
-4. [ ] Schedule the qualified gas tech for Tests 4, 5 and 9 — supply pressure static **and running**, manifold
-       pressure against the valve tag, orifice size, CO, flame microamps at the Fenwal FC+/FC− pins.
-5. [ ] Confirm circulation blower rotation is CCW from the top (Test 8).
-6. [ ] Run the LBC rate-of-rise benchmark (Test 6) and record it as this oven's new baseline.
-7. [ ] Retrieve the original LBC start-up form for this oven — it holds the commissioned gas pressure,
+1. [ ] Ask the operator who saw it: **how long down, what changed when it recovered, how low it went** (§7).
+2. [ ] Run Test A — read and record `Sb` / `St` / `id`. Highest value, zero cost, oven stays in service.
+3. [ ] Run Test B — audit the vent setting on every recipe in use; correct OPEN → AUTO where it is not
+       deliberate for the product.
+4. [ ] Run Test C — hold 475 °F unattended past the setback delay and watch whether it walks down.
+5. [ ] If it recurs: Test 1 (heat sequence lights) **before** anything else, and note the bottom-out temperature.
+6. [ ] Record `T-Offset` and verify the display against an independent thermometer (Test 3).
+7. [ ] Schedule the qualified gas tech for Tests 5, 6 and 7 — running supply pressure, manifold pressure,
+       orifice size, CO, flame microamps — **if** the setting checks come back clean.
+8. [ ] Retrieve the original LBC start-up form for this oven; it holds the commissioned gas pressure,
        rate-of-rise, control parameters and shutter settings. Attach it to the asset record in Aptean EAM.
-8. [ ] Log the outcome with a date in §8 and replace the **VERIFY** markers with findings.
-9. [ ] If PM is overdue: LBC recommends authorized preventive maintenance every 6 months (Operators p.21).
+9. [ ] Log every result with a date in §9 and replace the **VERIFY** markers with findings.
+10. [ ] If PM is overdue: LBC recommends authorized preventive maintenance every 6 months (Operators p.21).
 
 ---
 
-## 8. Event log
+## 9. Event log
 
 - **2026-09-21** Symptom reported: set point 475 °F, oven plateaus ~410 °F and drops. LRO-2G5 spec sheet
-  supplied. No on-machine readings taken yet. This document created from OEM documentation only —
-  every cause below §3 is a hypothesis until Tests 1–3 are run.
+  supplied. Document created from OEM documentation only; no on-machine readings taken.
+- **2026-09-21** Johnathan confirmed: control is the **−70 digital**, and the **vent is set to OPEN**.
+  Resolved the control-type **VERIFY** in §1. Vent OPEN recorded as a standing finding (§4a).
+- **2026-09-21** Johnathan reported the oven **"went back to normal"** with no repair performed. Fault is
+  intermittent and self-clearing. Duration of the outage, the bottom-out temperature, and what changed at
+  the moment of recovery were **not captured** — these are now the open questions in §7.
 
 ---
 
-## 9. Sources
+## 10. Sources
 
 - LBC LRO-2G5 spec sheet (2/19), supplied as `b2600958-LBC_-_LRO-2G.pdf` — also at
   https://www.lbcbakery.com/wp-content/uploads/2017/12/LRO-2G5-Spec-12-17.pdf
 - LBC LRO-1G5/2G5/1E5/2E5 **Installation, Service and Parts Manual**, Rev 10-19 (51 pp) —
   https://www.lbcbakery.com/wp-content/uploads/2019/10/LRO-Install-Service-10-19.pdf
-  (specs p.7, gas connection p.23, **start-up form p.26–27**, air shutters p.28–29, parts p.40–42,
-  schematics p.45–50)
+  (specs p.7, gas connection p.23, **start-up form p.26–27**, air shutters p.28–29, control parts p.32,
+  parts p.40–42, schematics p.45–50)
 - LBC LRO **Operators Manual**, Rev 12-2021 —
   https://www.lbcbakery.com/wp-content/uploads/2022/07/LRO-Operators-manual-12-2021.pdf
   (PM interval p.21, control compartment / heat sequence lights p.28, back-up controls p.29,
   blower and vent functions p.32)
-- LBC factory schematic set **DWG 61111-174-4**, "Schematic, Rack Oven w/ Android Control" —
-  sheet 2 power connections, sheet 3 control I/O, **sheet 4 heat circuit** (in the Install/Service manual above)
+- LBC **LMO Max-E / LMO Max-G Operator's Manual**, Rev B 8-16 — same **40102-70** digital control family;
+  the only LBC manual found that documents the −70 setback parameters —
+  http://www.lbcbakery.com/wp-content/uploads/2016/09/LMO-Max-Rack-Oven-Operator-Manual-RevB-8-16.pdf
+  (vent OPEN/AUTO/CLOSED p.16, **Control Setback `SB`/`St`/`Id` and programming procedure p.17**)
+- LBC factory schematic set **DWG 61111-174-4** — sheet 2 power connections, sheet 3 control I/O,
+  **sheet 4 heat circuit** (in the Install/Service manual above)
 - Fenwal Series 35-65 / 35-66 24 VAC HSI control datasheet (DS 35 65 66) —
   https://www.pvi.com/dfsmedia/0533dbba17714b1ab581ab07a4cbb521/60528-source/637395363700000000/fenwal-35-65-and-35-66-24-vac-hsi-control-manual.pdf
   (flame sensitivity p.1, sequence / lockout / LED codes / troubleshooting p.2)
