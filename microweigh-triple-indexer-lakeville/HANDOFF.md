@@ -161,6 +161,24 @@ Identity the manual does print:
 from the front panel" before calling WeighTech, which is also confirmation they were never printed here.
 Capture them at the next line walk (§7 item 11); WeighTech will ask for the serial plus App and Build.
 
+### 2.2 WeighTech publishes no PM content for any machine
+
+Checked on 2026-09-21, to judge whether asking WeighTech (§7 item 9) is likely to produce anything.
+Their public manuals library lists seven documents — MicroWeigh Digital Weight Indicator, Datascale,
+Single & Dual Baggers, Standard Bagger-Bulker, Standard Checkweigher, and Tank Floorscale v2012/v2013.
+**No maintenance, PM, or service document, and no triple indexer manual at all** (ours was generated for
+this job — the PDF is TeX-produced and dated 2026-04-26).
+
+Downloaded and searched the four sibling *machine* manuals (Bagger-Bulker 24 pp, Single/Dual Bagger 24 pp,
+Checkweigher 28 pp, Datascale 22 pp) for interval language. **Every one returns exactly the same single
+hit** — the boilerplate Introduction sentence that also opens our manual ("...makes troubleshooting and
+actual *maintenance* repair so simple that anyone can be trained..."). Zero maintenance sections, zero
+intervals, across four machines and 98 pages.
+
+So the gap in our manual is not an omission specific to this job — **WeighTech does not write PM schedules
+into their machine documentation at all.** Still worth the call, but expect the answer to be no, and pivot
+the ask to a calibration interval and an air-supply spec.
+
 ---
 
 ## 3. Draft PM schedule
@@ -324,7 +342,9 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
        parameters (§13/§14) and the only copy of the as-built module map.
 9. [ ] Ask WeighTech directly whether a PM schedule exists for this machine that isn't in the manual —
        1-800-457-3720 / info@weightechinc.com. Have App `tri index 3` and Build 49 ready (p. 30 says they
-       will ask). If they have one, it supersedes §3.
+       will ask). If they have one, it supersedes §3. **Set expectations low** — see §2.2: none of their
+       published machine manuals contains maintenance content either. Ask specifically for a recommended
+       calibration interval and an air-prep spec even if no full PM schedule exists.
 10. [ ] Once §3 is agreed, load as EAM PM routes: D = operator round, W/M = maintenance, Q/A = planned window.
 11. [ ] Capture the identity the manual lacks (§2.1): serial off each of the three indicator front
         panels, any machine nameplate on the frame, and the two drive nameplates. Record here and on the
@@ -340,6 +360,7 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
 - WeighTech, Inc., Waldron AR — 1-800-457-3720, 479-637-4182, info@weightechinc.com — https://weightechinc.com
 - WeighTech MicroWeigh Digital Weight Indicator User's Guide (general indicator, not this machine) —
   https://wp.weightechinc.com/wp-content/uploads/2018/07/MicroWeigh-Digital-Weight-Indicator-Users-Guide.pdf
+- WeighTech manuals library (checked 2026-09-21; no PM or service document listed) — https://www.weightechinc.com/manuals/
 
 **Drives**
 - Invertek *Optidrive ODE-3 User Guide* Rev 1.01 — §3.9 Routine Maintenance (p. 10), §9.1 Environmental
@@ -378,3 +399,8 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
   654310 / 24 / 083). No machine serial, no WeighTech job number, and no indicator serials are printed
   anywhere, nor any capacity/throughput/accuracy-class rating — p. 30 confirms the indicator serial lives
   on the front panel. Capture of the panel serials added to §7 as item 11. Still nothing done to the machine.
+- **2026-09-21** Checked whether WeighTech publishes PM content anywhere. Their manuals library carries
+  seven documents, none maintenance-related and none for a triple indexer. Downloaded the four sibling
+  machine manuals and searched all 98 pages: **zero maintenance sections across all four** — the only
+  interval-keyword hit in each is the same Introduction boilerplate that opens our manual. Recorded in
+  §2.2; §7 item 9 amended to expect a "no" and to ask instead for a calibration interval and air-prep spec.
