@@ -179,6 +179,29 @@ So the gap in our manual is not an omission specific to this job — **WeighTech
 into their machine documentation at all.** Still worth the call, but expect the answer to be no, and pivot
 the ask to a calibration interval and an air-supply spec.
 
+### 2.3 Service history and machine age
+
+**Purchased / placed in service May 2026. No maintenance performed since** (as of 2026-09-21, per Johnathan).
+Machine reported running well. Manual is dated 2026-04-26, consistent with a May commissioning.
+
+Two consequences for the PM program:
+
+- **No operational baseline exists yet.** The P0 values printed in the manual (§13/§14) are factory values
+  captured before the machine ran — P0-10 run time reads `0:00:01` on both drives. Every reading in §4 is a
+  trend measure, so the first set taken off a healthy machine is worth more than any later one. Take it now
+  rather than after a fault.
+- **Calibration has not been verified in ~5 months of production.** "Running good" describes mechanical
+  function — gates cycling, boxes filling — not weighing accuracy. A head drifting high gives away product
+  on every box while looking healthy; drifting low is a regulatory exposure. This is the one item worth
+  closing independently of the PM program.
+
+Sequencing recommended on 2026-09-21: baseline readings + calibration verification this month (~1–2 hr, not
+a full PM); start the monthly from October; first semi-annual ~November (six months from purchase) or at the
+next planned shutdown. Running the full semi-annual at four months would find nothing.
+
+**Warranty — unconfirmed.** A May 2026 purchase is likely still covered. Worth reading the terms: a fault
+found now may be WeighTech's, and some warranties require documented maintenance to stay valid. **VERIFY**
+
 ---
 
 ## 3. Draft PM schedule
@@ -404,3 +427,9 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
   machine manuals and searched all 98 pages: **zero maintenance sections across all four** — the only
   interval-keyword hit in each is the same Introduction boilerplate that opens our manual. Recorded in
   §2.2; §7 item 9 amended to expect a "no" and to ask instead for a calibration interval and air-prep spec.
+- **2026-09-21** Johnathan reports the machine was **purchased in May 2026 and has had no maintenance since**,
+  and that it is running well. Recorded in §2.3 with the two consequences: no operational baseline exists
+  (the manual's P0 values are pre-run factory values), and calibration has not been verified in roughly five
+  months of production. Recommended taking baseline readings plus a calibration verification this month
+  rather than starting with a full PM, then monthly from October and the first semi-annual around November.
+  Warranty status unconfirmed — added to open questions. Nothing done to the machine.
