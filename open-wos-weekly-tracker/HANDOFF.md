@@ -14,6 +14,7 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 | `Open_WOs_simple.xlsx` | Two-tab version requested 2026-09-21: `Sheet1` (paste tab) + the original `Totals` page unchanged in layout. The 9/21/2026 block (D:E) counts from Sheet1 with COUNTIFS; the 9/15 block stays typed. No macro, so the date in E1 is typed. |
 | `Open_WOs_with_graph.xlsx` | Current version (2026-09-21, third request): `Sheet1` = the weekly-history chart page transplanted from the original workbook (table `WeeklyLog` + line chart, weeks 9/15 and 9/21 filled in); `Totals` = the user's page with the values they typed in Excel (9/21 block: 7, 6, 38, 241). No formulas count from an export; the user types the four counts each week. Built by `build_graph.py` from the original. |
 | `Open_WOs_auto.xlsx` | Current version (2026-09-21, fourth request): same two tabs, but the `WeeklyLog` table on `Sheet1` is all formulas that read the dated blocks on `Totals` (every 3 columns: A:B, D:E, G:H, J:K, M:N ...; a block counts when its date cell in row 1 is a real date). 26 rows pre-built; Tab in the last cell adds more. Chart names are dynamic (`INDEX():INDEX()` sized by `COUNT` of dates). Built by `build_auto.py`. Not opened in Excel here (LibreOffice cannot load files in the sandbox) — **VERIFY** in Excel that the table fills and the chart shows both weeks. |
+| `Open_WOs_tracker.xlsx` | Current version (2026-09-21, fifth request; user confirmed the auto-updating chart works in Excel). Adds an empty third block in G:H for next week, removes the header-only leftover block in M:N, sets label-column widths for future blocks, and adds three conditional formats that turn a block's empty date/count cells yellow until filled (`ISBLANK` + column-stride check + header in row 3). Two-line how-to in Totals rows 16–17 naming Aptean EAM > Open Work Orders. Built by `build_tracker.py`. |
 
 ## 2. How the workbook is meant to work
 
@@ -61,6 +62,10 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
   `Open_WOs_auto.xlsx`: table rows find the k-th dated block with `_xlfn.AGGREGATE(15,6,...)` over
   `Totals!$A$1:$ZZ$1` and pull rows 1/4/5/9/10 of that block with INDEX. Weekly routine is now:
   copy a block on Totals, paste it 3 columns to the right, type the date and four counts.
+
+- **2026-09-21** — User confirmed `Open_WOs_auto.xlsx` works in Excel (AGGREGATE/INDEX table and
+  dynamic chart names OK). Asked for a ready third block and an obvious place to enter the weekly
+  Aptean EAM numbers → `Open_WOs_tracker.xlsx`. Source system is now called Aptean EAM (was TabWare).
 
 ## 4. Changes made on 2026-09-21
 
