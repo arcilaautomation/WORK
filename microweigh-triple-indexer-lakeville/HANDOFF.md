@@ -118,16 +118,41 @@ WeighTech-specified interval.
 
 ### 2.1 Machine identification — not in this document
 
-The manual carries **no nameplate data for the indexer itself**: no machine model number beyond the
-descriptive name, no machine serial, no WeighTech job or order number, and no serial numbers for any of
-the three MicroWeigh indicators. The drawing block (sheets 1–5, pp. 40–44) reads only `JOB: TRIPLE
-INDEXER` / `PLANT: BUDDY'S KITCHEN` / `LOCATION: LAKEVILLE, MN` / `DRAWN BY: NEWELL  DATE: 4-26-2026`.
+**Model: `WeighTech MicroWeigh Triple Indexer`.** There is no alphanumeric part number behind it — that
+is simply how WeighTech names machines (their line also runs *MicroWeigh Datascale*, *MicroWeigh Standard
+Checkweigher*, *MicroWeigh Standard Bagger/Bulker*). Use it as the model on the EAM asset record.
 
-What the manual does give as identity:
+**Type: 3-lane gravity-fed net-weigh batch box filler.** The manual never states this in one phrase, but it
+is unambiguous from the operation sections:
+
+| Trait | Evidence |
+|---|---|
+| 3 independent weigh lanes, dual/triple selectable | Master + Remote 1 + Remote 2 (p. 9); "Mode" Dual/triple (p. 21) |
+| Two gates per lane — diverter above, weigh hopper below | Dump-cycle states holding → filling → weighing → box → dumping → emptying → zeroing (p. 29) |
+| Gravity fill from an infeed belt, weighed on the way in | Hopper fills until target exceeded, then buffer gate shuts (p. 12) |
+| **Net** weighing | Autozeroes the empty hopper each cycle "even if there's some build up" (p. 12) |
+| Discharges into boxes on an indexing conveyor | Box-detect opto + index timer places the box under the funnel (p. 9) |
+| Batching capable | Multiple dumps per box when Target > "Dump lmt" = hopper capacity (p. 13) |
+| 200 lb load cell per hopper | Part 1000-10 (p. 39) |
+| Discharge variants | Air clutch / motor drive, stop gate, or Starflex bagger coordination (p. 9) |
+
+**It is not a combination (multihead) weigher.** "Fill pri" / "Dump pri" — fill or dump *by priority rather
+than first ready* (p. 21) — show lanes dispatched sequentially, each filling to its own target. A
+combination weigher solves for a subset of hoppers summing to target; this machine does no such math.
+
+**No nameplate or spec-sheet data appears anywhere**: no machine serial, no WeighTech job or order number,
+no serials for the three indicators, and none of the rating data an asset record wants — no capacity
+rating ("Capacity" is a field *you* set, p. 26, not a published spec), no hopper volume, no throughput
+rate, no box size range, no footprint, and no NTEP or accuracy class (though the sealed/audited parameters
+and the Audit cfg / Audit cal counters, p. 6, mean it is built to *be* sealed for trade). The drawing block
+(sheets 1–5, pp. 40–44) reads only `JOB: TRIPLE INDEXER` / `PLANT: BUDDY'S KITCHEN` /
+`LOCATION: LAKEVILLE, MN` / `DRAWN BY: NEWELL  DATE: 4-26-2026` — no drawing number, no revision.
+
+Identity the manual does print:
 
 | Identifier | Value | Where |
 |---|---|---|
-| Machine designation | **MicroWeigh Triple Indexer** | Title page; drawing `JOB:` block |
+| Model | **WeighTech MicroWeigh Triple Indexer** | Title page; drawing `JOB:` block |
 | Firmware app | **`tri index 3`**, Build **49**, compiled 02/13/2024 | Info menu, pp. 23, 27 |
 | Infeed drive serial | 649453 / 18 / 057 | §13 P0-30, p. 34 |
 | Box takeaway drive serial | 654310 / 24 / 083 | §14 P0-30, p. 38 |
@@ -346,8 +371,10 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
   two "PM" hits in it are *permanent magnet* (P-51 motor control mode, p. 35; part 10575 motor, p. 39).
   This project directory and the §3 draft schedule created from the manual's failure modes plus component
   OEM guidance. Nothing done to the machine; no readings taken on site yet.
-- **2026-09-21** Manual searched for model/serial identification. **Finding: the only serials in the
-  document are the two Optidrive E3 drive serials at P0-30** (infeed 649453 / 18 / 057, box takeaway
+- **2026-09-21** Manual searched for model/serial identification. Model is **WeighTech MicroWeigh Triple
+  Indexer** (no alphanumeric part number; WeighTech names machines descriptively) and the type is a 3-lane
+  gravity-fed net-weigh batch box filler, not a combination weigher — both recorded in §2.1 with evidence.
+  **The only serials in the document are the two Optidrive E3 drive serials at P0-30** (infeed 649453 / 18 / 057, box takeaway
   654310 / 24 / 083). No machine serial, no WeighTech job number, and no indicator serials are printed
-  anywhere — p. 30 confirms the indicator serial lives on the front panel. Recorded in §2.1; capture of
-  the panel serials added to §7 as item 11. Still nothing done to the machine.
+  anywhere, nor any capacity/throughput/accuracy-class rating — p. 30 confirms the indicator serial lives
+  on the front panel. Capture of the panel serials added to §7 as item 11. Still nothing done to the machine.
