@@ -8,6 +8,7 @@ directory with a `HANDOFF.md` as its living record.
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
+| `open-wos-weekly-tracker/` | Open work-order weekly count workbook (`Open_WOs.xlsm`, TabWare export → Totals → Weekly History chart) | Repaired 2026-09-21 — needs a check in Excel, see `HANDOFF.md` §5 |
 
 ## Conventions
 
