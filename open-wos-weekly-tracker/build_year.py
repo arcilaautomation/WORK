@@ -1,4 +1,4 @@
-"""Open_WOs_tracker.xlsx: Sheet1 = weekly chart page fed by formulas over the dated blocks on
+"""Open_WOs_tracker.xlsx: History = weekly chart page fed by formulas over the dated blocks on
 Totals; Totals = the user's page with blocks pre-built weekly through the end of 2026."""
 import re, zipfile, datetime
 from xml.sax.saxutils import escape
@@ -50,15 +50,15 @@ NAMES = {
  'chart_BV':   f'INDEX(WeeklyLog[Burnsville Total],1):INDEX(WeeklyLog[Burnsville Total],{N})',
  'chart_LV':   f'INDEX(WeeklyLog[Lakeville Total],1):INDEX(WeeklyLog[Lakeville Total],{N})',
  'chart_CO':   f'INDEX(WeeklyLog[Combined Total],1):INDEX(WeeklyLog[Combined Total],{N})',
- 'last_BV':    'IF(Sheet1!chart_Week=MAX(Sheet1!chart_Week),Sheet1!chart_BV,NA())',
- 'last_LV':    'IF(Sheet1!chart_Week=MAX(Sheet1!chart_Week),Sheet1!chart_LV,NA())',
- 'last_CO':    'IF(Sheet1!chart_Week=MAX(Sheet1!chart_Week),Sheet1!chart_CO,NA())',
+ 'last_BV':    'IF(History!chart_Week=MAX(History!chart_Week),History!chart_BV,NA())',
+ 'last_LV':    'IF(History!chart_Week=MAX(History!chart_Week),History!chart_LV,NA())',
+ 'last_CO':    'IF(History!chart_Week=MAX(History!chart_Week),History!chart_CO,NA())',
 }
 
 wb = get('xl/workbook.xml')
-wb = sub1(wb, r'<sheets>.*?</sheets>', '<sheets><sheet name="Sheet1" sheetId="17" r:id="rId2"/><sheet name="Totals" sheetId="2" r:id="rId1"/></sheets>', flags=re.S)
+wb = sub1(wb, r'<sheets>.*?</sheets>', '<sheets><sheet name="History" sheetId="17" r:id="rId2"/><sheet name="Totals" sheetId="2" r:id="rId1"/></sheets>', flags=re.S)
 wb = sub1(wb, r'<definedNames>.*?</definedNames>', '<definedNames>' + ''.join(f'<definedName name="{k}" localSheetId="0">{escape(v)}</definedName>' for k, v in NAMES.items()) + '</definedNames>', flags=re.S)
-wb = sub1(wb, r'<workbookView ', '<workbookView activeTab="1" ')
+wb = sub1(wb, r'<workbookView ', '<workbookView activeTab="0" ')
 wb = sub1(wb, r'<workbookPr codeName="ThisWorkbook" ', '<workbookPr ')
 wb = sub1(wb, r' codeName="\{[0-9A-F-]+\}"', '')
 wb = sub1(wb, r'<mc:AlternateContent xmlns:mc="[^"]+"><mc:Choice Requires="x15"><x15ac:absPath[^>]+/></mc:Choice></mc:AlternateContent>', '')
@@ -69,6 +69,7 @@ put('xl/workbook.xml', wb)
 s1 = get('xl/worksheets/sheet1.xml')
 s1 = sub1(s1, r'<sheetPr codeName="Sheet1"/>', '<sheetPr/>')
 s1 = sub1(s1, r'<selection activeCell="H19" sqref="H19"/>', '<selection activeCell="A1" sqref="A1"/>')
+s1 = sub1(s1, r'<sheetView tabSelected="1" workbookViewId="0">', '<sheetView workbookViewId="0">')
 s1 = sub1(s1, r'<c r="D3" s="42"/>', '<c r="D3" s="42" t="s"><v>1</v></c>')
 s1 = sub1(s1, r'<c r="D4" s="5"><v>6</v></c>', '<c r="D4" s="5"><v>7</v></c>')
 s1 = sub1(s1, r'<c r="D10" s="5"><v>240</v></c>', '<c r="D10" s="5"><v>241</v></c>')
@@ -127,7 +128,7 @@ st = sub1(st, r'<dxfs count="18">', '<dxfs count="19">')
 st = sub1(st, r'</dxfs>', '<dxf><fill><patternFill><bgColor rgb="FFFFFF00"/></patternFill></fill></dxf></dxfs>')
 put('xl/styles.xml', st)
 
-# ---- Sheet1 (chart page) ---------------------------------------------------------------------
+# ---- History (chart page) ---------------------------------------------------------------------
 known = {1: (46280, 11, 3, 14, 32, 173, 205, 219, ''), 2: (46286, 7, 6, 13, 38, 241, 279, 292, 73)}
 def cell(ref, s, f, v, ca=False):
     fa = ' ca="1"' if ca else ''
@@ -142,6 +143,8 @@ for i in range(1, NROWS + 1):
 last = 21 + NROWS
 s2 = get('xl/worksheets/sheet2.xml')
 s2 = sub1(s2, r'<dimension ref="A1:I22"/>', f'<dimension ref="A1:I{last}"/>')
+s2 = sub1(s2, r'<sheetView showGridLines="0" zoomScaleNormal="100" workbookViewId="0">', '<sheetView tabSelected="1" showGridLines="0" zoomScaleNormal="100" workbookViewId="0">')
+s2 = sub1(s2, r'<selection activeCell="B26" sqref="B26"/>', '<selection activeCell="A1" sqref="A1"/>')
 s2 = sub1(s2, r'<row r="2" spans="1:1" x14ac:dyDescent="0.25"><c r="A2" s="33"/></row>',
           '<row r="2" spans="1:1" x14ac:dyDescent="0.25"><c r="A2" s="33" t="inlineStr"><is><t>Updates by itself from the Totals page: every block there that has a date and numbers is one week.</t></is></c></row>')
 s2 = sub1(s2, r'<row r="22" .*?</row></sheetData>', ''.join(rows) + '</sheetData>', flags=re.S)
@@ -157,7 +160,7 @@ for name, key in [('Week Of','week'),('Burnsville Repair Tickets','bvrt'),('Burn
     t1 = sub1(t1, rf'(<tableColumn id="\d+" xr3:uid="[^"]+" name="{re.escape(name)}" dataDxfId="\d+")(?:/>|>.*?</tableColumn>)',
               lambda m, key=key: m.group(1) + '><calculatedColumnFormula>' + escape(F[key]) + '</calculatedColumnFormula></tableColumn>', flags=re.S)
 put('xl/tables/table1.xml', t1)
-ch = get('xl/charts/chart1.xml').replace("'Weekly History'!", 'Sheet1!'); assert ch.count('Sheet1!') == 12
+ch = get('xl/charts/chart1.xml').replace("'Weekly History'!", 'History!'); assert ch.count('History!') == 12
 sers = ch.split('<c:ser>'); vals = [13, 279, 292, 13, 279, 292]
 for i in range(1, 7):
     s = sub1(sers[i], r'<c:ptCount val="1"/><c:pt idx="0"><c:v>46280</c:v></c:pt>', '<c:ptCount val="2"/><c:pt idx="0"><c:v>46280</c:v></c:pt><c:pt idx="1"><c:v>46286</c:v></c:pt>')
@@ -169,8 +172,8 @@ app = get('docProps/app.xml')
 app = sub1(app, r'<HeadingPairs>.*?</TitlesOfParts>',
   '<HeadingPairs><vt:vector size="4" baseType="variant"><vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>2</vt:i4></vt:variant>'
   '<vt:variant><vt:lpstr>Named Ranges</vt:lpstr></vt:variant><vt:variant><vt:i4>4</vt:i4></vt:variant></vt:vector></HeadingPairs>'
-  '<TitlesOfParts><vt:vector size="6" baseType="lpstr"><vt:lpstr>Sheet1</vt:lpstr><vt:lpstr>Totals</vt:lpstr>'
-  '<vt:lpstr>Sheet1!chart_BV</vt:lpstr><vt:lpstr>Sheet1!chart_CO</vt:lpstr><vt:lpstr>Sheet1!chart_LV</vt:lpstr><vt:lpstr>Sheet1!chart_Week</vt:lpstr></vt:vector></TitlesOfParts>', flags=re.S)
+  '<TitlesOfParts><vt:vector size="6" baseType="lpstr"><vt:lpstr>History</vt:lpstr><vt:lpstr>Totals</vt:lpstr>'
+  '<vt:lpstr>History!chart_BV</vt:lpstr><vt:lpstr>History!chart_CO</vt:lpstr><vt:lpstr>History!chart_LV</vt:lpstr><vt:lpstr>History!chart_Week</vt:lpstr></vt:vector></TitlesOfParts>', flags=re.S)
 put('docProps/app.xml', app)
 # ---- prune unused shared strings, write
 ss = get('xl/sharedStrings.xml'); head, body = ss.split('<sst', 1); body = '<sst' + body
