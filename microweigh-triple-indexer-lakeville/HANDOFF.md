@@ -58,6 +58,16 @@ Both: P-12 = 0 Terminal Mode, P-15 = 10 (close to run / open to stop), P-17 8 kH
 **The §13/§14 parameter listings are the golden record for these drives** — verify live values against
 them at Q2 and after any drive swap.
 
+**Drive identity, read from the listings (P0-29 / P0-30, as of 2026-04-26):**
+| Tag | Drive type | Rating | Firmware | **Serial (P0-30)** |
+|---|---|---|---|---|
+| Infeed | E3 | 460 V 3~ 1.0 HP | 3.11 (I/O `72B9`, Power `0E61`) | **649453 / 18 / 057** |
+| Box takeaway | E3 | 460 V 3~ 2.0 HP | 3.11 (I/O `72B9`, Power `0E61`) | **654310 / 24 / 083** |
+
+These two are the **only serial numbers anywhere in the manual** — see §2.1. Invertek documents P0-30
+only as "unique drive serial number" and does not break down the three fields, so don't read `18` / `057`
+as a year/week without confirming (**VERIFY**).
+
 > "PM" in those listings means **permanent magnet**, not preventive maintenance — P-51 "PM Vector Speed
 > Control" (p. 35) and part 10575 "Motor, PM" (p. 39). Don't let it fool a keyword search.
 
@@ -105,6 +115,26 @@ maintenance-adjacent content is reactive:
 
 Everything in §3 below is built from that column plus the component OEM docs. Nothing in §3 is a
 WeighTech-specified interval.
+
+### 2.1 Machine identification — not in this document
+
+The manual carries **no nameplate data for the indexer itself**: no machine model number beyond the
+descriptive name, no machine serial, no WeighTech job or order number, and no serial numbers for any of
+the three MicroWeigh indicators. The drawing block (sheets 1–5, pp. 40–44) reads only `JOB: TRIPLE
+INDEXER` / `PLANT: BUDDY'S KITCHEN` / `LOCATION: LAKEVILLE, MN` / `DRAWN BY: NEWELL  DATE: 4-26-2026`.
+
+What the manual does give as identity:
+
+| Identifier | Value | Where |
+|---|---|---|
+| Machine designation | **MicroWeigh Triple Indexer** | Title page; drawing `JOB:` block |
+| Firmware app | **`tri index 3`**, Build **49**, compiled 02/13/2024 | Info menu, pp. 23, 27 |
+| Infeed drive serial | 649453 / 18 / 057 | §13 P0-30, p. 34 |
+| Box takeaway drive serial | 654310 / 24 / 083 | §14 P0-30, p. 38 |
+
+**The indicator serials must be read off the machine** — p. 30 says to "gather the indicator serial number
+from the front panel" before calling WeighTech, which is also confirmation they were never printed here.
+Capture them at the next line walk (§7 item 11); WeighTech will ask for the serial plus App and Build.
 
 ---
 
@@ -271,6 +301,9 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
        1-800-457-3720 / info@weightechinc.com. Have App `tri index 3` and Build 49 ready (p. 30 says they
        will ask). If they have one, it supersedes §3.
 10. [ ] Once §3 is agreed, load as EAM PM routes: D = operator round, W/M = maintenance, Q/A = planned window.
+11. [ ] Capture the identity the manual lacks (§2.1): serial off each of the three indicator front
+        panels, any machine nameplate on the frame, and the two drive nameplates. Record here and on the
+        EAM asset record — without an indicator serial a WeighTech support call stalls at the first question.
 
 ---
 
@@ -313,3 +346,8 @@ numbers, order through WeighTech (1-800-457-3720) unless noted.
   two "PM" hits in it are *permanent magnet* (P-51 motor control mode, p. 35; part 10575 motor, p. 39).
   This project directory and the §3 draft schedule created from the manual's failure modes plus component
   OEM guidance. Nothing done to the machine; no readings taken on site yet.
+- **2026-09-21** Manual searched for model/serial identification. **Finding: the only serials in the
+  document are the two Optidrive E3 drive serials at P0-30** (infeed 649453 / 18 / 057, box takeaway
+  654310 / 24 / 083). No machine serial, no WeighTech job number, and no indicator serials are printed
+  anywhere — p. 30 confirms the indicator serial lives on the front panel. Recorded in §2.1; capture of
+  the panel serials added to §7 as item 11. Still nothing done to the machine.
