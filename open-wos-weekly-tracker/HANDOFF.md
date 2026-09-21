@@ -11,6 +11,7 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 | `Open_WOs_fixed.xlsm` | Repaired workbook, 2026-09-21. Deliverable. |
 | `Open_WOs_original_2026-09-21.xlsm` | As received on 2026-09-21, for reference. |
 | `build_fix.py` | Script that produced the fixed file from the original by editing the OOXML parts directly (keeps VBA, chart, table style byte-for-byte). |
+| `Open_WOs_simple.xlsx` | Two-tab version requested 2026-09-21: `Sheet1` (paste tab) + the original `Totals` page unchanged in layout. The 9/21/2026 block (D:E) counts from Sheet1 with COUNTIFS; the 9/15 block stays typed. No macro, so the date in E1 is typed. |
 
 ## 2. How the workbook is meant to work
 
@@ -46,6 +47,9 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
   Burnsville 22 repair + 67 PM = 89; Lakeville 18 + 109 = 127; combined 216; not counted 0.
   LibreOffice would not load any file in the sandbox, so the workbook has not yet been
   opened by a spreadsheet application. **VERIFY** in Excel (see §5).
+
+- **2026-09-21** — User asked for a two-tab version with the Totals page as it was; built
+  `Open_WOs_simple.xlsx` from the original with openpyxl (see file table).
 
 ## 4. Changes made on 2026-09-21
 
