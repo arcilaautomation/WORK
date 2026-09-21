@@ -1,13 +1,15 @@
 # WORK — project memory
 
-Maintenance / controls notes for Buddy's Kitchen (Burnsville, MN). Each project gets a
-directory with a `HANDOFF.md` as its living record.
+Maintenance / controls notes for Buddy's Kitchen. Mostly Burnsville, MN; the MicroWeigh
+triple indexer is a Lakeville, MN machine (site relationship **VERIFY** — see that project's
+`HANDOFF.md` §6 Q1). Each project gets a directory with a `HANDOFF.md` as its living record.
 
 ## Projects
 
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
+| `microweigh-triple-indexer-lakeville/` | WeighTech MicroWeigh Triple Indexer (Lakeville, MN) — PM schedule | Open — draft PM schedule pending line walk; see its `HANDOFF.md` §7 |
 
 ## Conventions
 
