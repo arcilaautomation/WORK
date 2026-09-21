@@ -12,6 +12,7 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 | `Open_WOs_original_2026-09-21.xlsm` | As received on 2026-09-21, for reference. |
 | `build_fix.py` | Script that produced the fixed file from the original by editing the OOXML parts directly (keeps VBA, chart, table style byte-for-byte). |
 | `Open_WOs_simple.xlsx` | Two-tab version requested 2026-09-21: `Sheet1` (paste tab) + the original `Totals` page unchanged in layout. The 9/21/2026 block (D:E) counts from Sheet1 with COUNTIFS; the 9/15 block stays typed. No macro, so the date in E1 is typed. |
+| `Open_WOs_with_graph.xlsx` | Current version (2026-09-21, third request): `Sheet1` = the weekly-history chart page transplanted from the original workbook (table `WeeklyLog` + line chart, weeks 9/15 and 9/21 filled in); `Totals` = the user's page with the values they typed in Excel (9/21 block: 7, 6, 38, 241). No formulas count from an export; the user types the four counts each week. Built by `build_graph.py` from the original. |
 
 ## 2. How the workbook is meant to work
 
@@ -50,6 +51,10 @@ Weber). It counts open work orders per plant (Burnsville, Lakeville) from a TabW
 
 - **2026-09-21** — User asked for a two-tab version with the Totals page as it was; built
   `Open_WOs_simple.xlsx` from the original with openpyxl (see file table).
+
+- **2026-09-21** — User opened `Open_WOs_simple.xlsx` in Excel, typed 7/6/38/241 over the 9/21
+  formulas, and asked for the chart page back on `Sheet1` with Totals values kept. Built
+  `Open_WOs_with_graph.xlsx`. The export-counting idea is dropped: the user prefers typing.
 
 ## 4. Changes made on 2026-09-21
 
