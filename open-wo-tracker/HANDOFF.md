@@ -7,7 +7,7 @@ Burnsville and Lakeville.
 
 ## 1. What this is and who asked for it
 
-Johnathan's boss asked, in writing:
+The boss asked, in writing:
 
 > "Can we take this data and put in on a spreadsheet each week so we can see history?
 > So each week update the spreadsheet and send it out. Thanks"
@@ -23,7 +23,10 @@ else calculated, one dashboard to send out.
 | `build_tracker.py` | Generates the workbook from scratch. Re-run it to rebuild; it is the authoritative description of every formula. |
 | `HANDOFF.md` | This file. |
 
-`python3 build_tracker.py Open_WOs_tracker.xlsx` rebuilds the file. Rebuilding
+`python3 build_tracker.py Open_WOs_tracker.xlsx` rebuilds the file. It needs
+`openpyxl`, and `formulas` for the step that stores computed results in the file
+(without it the build still works, but previews show blanks until the file is
+saved once in Excel). Rebuilding
 **discards any counts typed into the workbook since it was generated** — the seed
 data lives in the `SEED` dict in the script. Change the script and re-seed, or
 edit the workbook directly, but do not do both and expect them to merge.
@@ -77,6 +80,15 @@ Three tabs: **History** (dashboard + weekly log, the tab you send), **Totals**
   the Read Me health check warns if blocks are ever created past that.
 - **The three sheets are protected with no password.** Only the blue input cells
   and the two yellow fill-ins are unlocked.
+- **Every formula ships with its computed result stored beside it**, and every
+  chart ships with its points cached, in the same shape Excel itself wrote in the
+  original workbook. Excel still recalculates on open, but previews that only read
+  stored results (Outlook attachment preview, iPhone Quick Look, SharePoint
+  thumbnails) show the real dashboard instead of blanks.
+- **The charts read dynamic named ranges** (a rolling 26-week window). This is the
+  same construct as the original workbook, which was last saved by Microsoft
+  Excel with Excel's own cached results for it — so Excel evaluates it correctly.
+  LibreOffice cannot evaluate it and draws from the stored cache instead.
 
 ## 5. Event log
 
@@ -92,10 +104,27 @@ Three tabs: **History** (dashboard + weekly log, the tab you send), **Totals**
   and by running eight scenarios against the real file: baseline, a third full
   week, a part-filled week, a duplicated date, a skipped week, one week only, no
   weeks, and a week of genuine zeros.
-- **2026-09-22** — LibreOffice in the build environment cannot load any `.xlsx`,
-  so the usual recalculate-and-render check could not be run. Formula results were
-  verified with the `formulas` engine instead. **VERIFY** — nobody has opened the
-  rebuilt file in real Excel yet. First open is the outstanding check.
+- **2026-09-22** — LibreOffice in the build environment could not load any
+  `.xlsx`, so the recalculate-and-render check could not be run at first. Formula
+  results were verified with the `formulas` engine instead.
+- **2026-09-22 (evening)** — Found why LibreOffice failed: only its core was
+  installed, not the spreadsheet component (`libreoffice-calc`). Installed it and
+  rendered the workbook for the first time. Findings: all three charts drew empty,
+  because LibreOffice cannot evaluate formula-based chart ranges; the file stored
+  no computed results at all, so any previewer would show a blank dashboard; the
+  scorecard's headline label was truncated; chart titles wrapped and crowded the
+  plots; the headline said "6 days earlier" for what is a normal weekly gap.
+  Checked the original workbook: its `docProps/app.xml` names Microsoft Excel as
+  the application that last saved it, and its chart carries Excel's own cached
+  points for the same dynamic ranges, endpoint labels included — so the chart
+  construct is proven in Excel. Fixed: results stored for all 3,701 formulas and
+  chart points cached in Excel's format; scorecard regrouped under REPAIR TICKETS /
+  PMs / ALL OPEN with short row labels; email box moved beside the scorecard,
+  above the fold; charts widened with short titles; a recent-notes panel beside
+  the third chart; a 5-to-9-day gap now reads "last week"; empty future weeks on
+  Totals show blank totals instead of zeros. Re-rendered and re-ran all eight
+  scenarios. **VERIFY** — still not opened in real Excel. First open is the
+  outstanding check, now lower-risk given the original's evidence.
 
 ## 6. Action list
 

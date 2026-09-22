@@ -28,14 +28,21 @@ import sys
 import zipfile
 
 from openpyxl import Workbook
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
 from openpyxl.chart import LineChart
 from openpyxl.chart.series import Series, SeriesLabel
 from openpyxl.chart.data_source import AxDataSource, NumDataSource, NumRef
 from openpyxl.chart.label import DataLabelList
 from openpyxl.chart.legend import LegendEntry
+from openpyxl.chart.text import RichText, Text
+from openpyxl.chart.title import Title
 from openpyxl.chart.marker import Marker
 from openpyxl.chart.shapes import GraphicalProperties
 from openpyxl.drawing.line import LineProperties
+from openpyxl.drawing.text import (CharacterProperties, Paragraph,
+                                   ParagraphProperties, RegularTextRun,
+                                   RichTextProperties)
 from openpyxl.formatting.rule import Rule
 from openpyxl.styles import (Alignment, Border, Font, PatternFill, Protection,
                              Side)
@@ -84,7 +91,7 @@ R_FLAG, R_FILLED_IX, R_ALL_IX, R_SCALAR = 30, 31, 32, 33   # hidden helpers
 R_BROKEN, R_DUP = 34, 35                                   # hidden guard rails
 
 # History geometry
-LOG_HEAD  = 55
+LOG_HEAD  = 57
 LOG_FIRST = LOG_HEAD + 1
 LOG_ROWS  = 110
 LOG_LAST  = LOG_FIRST + LOG_ROWS - 1
@@ -217,9 +224,12 @@ def build_totals(ws, dates):
             cc.protection = Protection(locked=False)
 
         for row, f, label in (
-            (R_BV_TOT, f"=SUM({a}{R_BV_REP}+{a}{R_BV_PM})", "TOTAL"),
-            (R_LV_TOT, f"=SUM({a}{R_LV_REP}+{a}{R_LV_PM})", "TOTAL"),
-            (R_CO_TOT, f"=SUM({a}{R_BV_TOT}+{a}{R_LV_TOT})",
+            (R_BV_TOT, f'=IF(COUNT({a}{R_BV_REP},{a}{R_BV_PM})=0,"",'
+                       f'SUM({a}{R_BV_REP},{a}{R_BV_PM}))', "TOTAL"),
+            (R_LV_TOT, f'=IF(COUNT({a}{R_LV_REP},{a}{R_LV_PM})=0,"",'
+                       f'SUM({a}{R_LV_REP},{a}{R_LV_PM}))', "TOTAL"),
+            (R_CO_TOT, f'=IF(COUNT({a}{R_BV_REP},{a}{R_BV_PM},{a}{R_LV_REP},'
+                       f'{a}{R_LV_PM})=0,"",SUM({a}{R_BV_TOT},{a}{R_LV_TOT}))',
              "TOTAL OPEN IN BOTH PLANTS"),
         ):
             cell = ws.cell(row, c, f)
@@ -286,7 +296,7 @@ def build_totals(ws, dates):
         "A block still blank after its date has passed turns yellow, so you can see "
         "what you missed.",
         "Row 15 of each block is a free-text NOTE. Anything you type there shows up "
-        "in the Notes column of the weekly log, next to that week.",
+        "beside the charts on the History tab and in the weekly log, next to that week.",
         "Blocks are pre-built through " + week_dates(N_BLOCKS)[-1].strftime("%B %d, %Y")
         + ". See the Read Me tab to add more.",
     ]
@@ -357,6 +367,9 @@ def build_totals(ws, dates):
     ws.sheet_properties.tabColor = "FF2A78D6"
     ws.freeze_panes = None
     ws.page_setup.orientation = "landscape"
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.page_setup.fitToHeight = 1
+    ws.page_setup.fitToWidth = 0
 
 
 # ---------------------------------------------------------------- History
@@ -392,23 +405,48 @@ def log_formula_row(ws, r, n):
             f'{COL_COMB}{r}-{COL_COMB}{r - 1})')
 
 
-SCORECARD = [
-    # row, label, source column, emphasis: "hero" | "strong" | None
-    (6,  "Open repair tickets — Burnsville",  COL_BVR,  None),
-    (7,  "Open repair tickets — Lakeville",   COL_LVR,  None),
-    (8,  "OPEN REPAIR TICKETS — BOTH PLANTS", COL_REPT, "hero"),
-    (10, "Open PMs — Burnsville",             COL_BVP,  None),
-    (11, "Open PMs — Lakeville",              COL_LVP,  None),
-    (12, "Open PMs — both plants",            COL_PMT,  "strong"),
-    (14, "All open work orders — Burnsville", COL_BVT,  None),
-    (15, "All open work orders — Lakeville",  COL_LVT,  None),
-    (16, "All open work orders — both plants", COL_COMB, "strong"),
-]
+# ---------------------------------------------------------------- History layout
+# Every row the dashboard uses is named here, so the headline, the email text and
+# the conditional formats cannot drift out of step with the layout.
 
-# Only the repair rows get the red/green treatment. A PM count rising because the
+R_TITLE, R_SUB, R_HEAD, R_WARN, R_SC_HEAD = 1, 2, 3, 4, 5
+SC_GROUPS = [
+    # heading row, heading, gloss, [(row, label, source column, emphasis)]
+    (6, "REPAIR TICKETS", "unplanned backlog — the number to watch",
+     [(7, "Burnsville", COL_BVR, None),
+      (8, "Lakeville", COL_LVR, None),
+      (9, "Both plants", COL_REPT, "hero")]),
+    (10, "PMs", "scheduled work — jumps whenever a new batch is released",
+     [(11, "Burnsville", COL_BVP, None),
+      (12, "Lakeville", COL_LVP, None),
+      (13, "Both plants", COL_PMT, "strong")]),
+    (14, "ALL OPEN WORK ORDERS", "repair tickets and PMs together",
+     [(15, "Burnsville", COL_BVT, None),
+      (16, "Lakeville", COL_LVT, None),
+      (17, "Both plants", COL_COMB, "strong")]),
+]
+R_REP_BV, R_REP_ALL = 7, 9
+R_PM_ALL = 13
+R_ALL_BV, R_ALL_LV, R_ALL = 15, 16, 17
+R_LEGEND, R_JUMP, R_TREND = 18, 19, 20
+R_CHARTS_1, R_CHARTS_2 = 21, 38
+R_NOTES_HEAD, NOTES_SHOWN = 38, 8
+R_PRINT_END = 55
+R_LOG_BAND = LOG_HEAD - 1
+EMAIL_BOX = "I6:L17"
+
+CHART_W_CM, CHART_H_CM = 15.5, 8.0
+
+# Only the repair rows are coloured red/green. A PM count rising because the
 # maintenance system released a batch is not a problem, and colouring it red is
 # how a routine week starts looking like a crisis.
-COLOURED_CHANGE = "F6:F8"
+COLOURED_CHANGE = f"F{R_REP_BV}:F{R_REP_ALL}"
+
+
+def delta_phrase(cell):
+    """Formula fragment: 'up 3' / 'down 3' / 'unchanged' for a change cell."""
+    return (f'IF({cell}>0,"up "&TEXT({cell},"{FMT_COUNT}"),'
+            f'IF({cell}<0,"down "&TEXT(-{cell},"{FMT_COUNT}"),"unchanged"))')
 
 
 def build_history(ws, last_date, link_cell):
@@ -426,51 +464,53 @@ def build_history(ws, last_date, link_cell):
 
     rng = lambda col: f"${col}${LOG_FIRST}:${col}${LOG_LAST}"
 
-    # hidden helpers
-    ws["N1"] = f"=COUNT({rng(COL_WEEK)})"
-    ws["N2"] = f'=IF({N_WEEKS}=0,"",INDEX({rng(COL_WEEK)},{N_WEEKS}))'
+    # ---- hidden helpers in column N -----------------------------------------
+    ws["N1"] = f"=COUNT({rng(COL_WEEK)})"                        # weeks recorded
+    ws["N2"] = f'=IF({N_WEEKS}=0,"",INDEX({rng(COL_WEEK)},{N_WEEKS}))'  # latest
     ws["N3"] = f"=Totals!$C${R_SCALAR}"          # blocks inside the scanned range
     ws["N4"] = f"=Totals!$D${R_SCALAR}"          # blocks anywhere on row 1
-    ws["N6"] = (f'=IF({N_WEEKS}<2,"",INDEX({rng(COL_WEEK)},{N_WEEKS})'
-                f'-INDEX({rng(COL_WEEK)},{N_WEEKS}-1))')
-    ws["N7"] = ('=IF($N$6="","",IF($N$6=7,"vs last week",'
-                '"vs the previous entry, "&TEXT($N$6,"0")&" days earlier"))')
     ws["N5"] = (f"=IF('Read Me'!{link_cell}=\"\","
                 f"\"(paste the file link — see the Read Me tab)\","
                 f"'Read Me'!{link_cell})")
+    ws["N6"] = (f'=IF({N_WEEKS}<2,"",INDEX({rng(COL_WEEK)},{N_WEEKS})'
+                f'-INDEX({rng(COL_WEEK)},{N_WEEKS}-1))')       # days since previous
+    # 5 to 9 days is "last week": the counts are pulled weekly but not always on
+    # the same weekday (the first two entries are a Tuesday and a Monday)
+    ws["N7"] = ('=IF($N$6="","",IF(AND($N$6>=5,$N$6<=9),"vs last week",'
+                'IF($N$6>9,"vs "&TEXT(ROUND($N$6/7,0),"0")&" weeks ago",'
+                '"vs "&TEXT($N$6,"0")&" days ago")))')
 
     # ---- banner -------------------------------------------------------------
-    ws.merge_cells("A1:L1")
-    ws["A1"] = "OPEN WORK ORDERS — WEEKLY HISTORY"
-    ws["A1"].font = Font(name=FONT, size=20, bold=True, color=INK)
-    ws["A1"].alignment = left
-    ws.row_dimensions[1].height = 30
+    ws.merge_cells(f"A{R_TITLE}:L{R_TITLE}")
+    ws[f"A{R_TITLE}"] = "OPEN WORK ORDERS — WEEKLY HISTORY"
+    ws[f"A{R_TITLE}"].font = Font(name=FONT, size=20, bold=True, color=INK)
+    ws[f"A{R_TITLE}"].alignment = left
+    ws.row_dimensions[R_TITLE].height = 30
 
-    ws.merge_cells("A2:L2")
-    ws["A2"] = ("Buddy's Kitchen · Burnsville and Lakeville · "
-                "type this week's counts on the Totals tab and everything below updates itself")
-    ws["A2"].font = Font(name=FONT, size=11, color=INK_SOFT)
-    ws["A2"].alignment = left
+    ws.merge_cells(f"A{R_SUB}:L{R_SUB}")
+    ws[f"A{R_SUB}"] = ("Buddy's Kitchen · Burnsville and Lakeville · type this week's "
+                       "counts on the Totals tab and everything below updates itself")
+    ws[f"A{R_SUB}"].font = Font(name=FONT, size=11, color=INK_SOFT)
+    ws[f"A{R_SUB}"].alignment = left
 
-    ws.merge_cells("A3:L3")
-    ws["A3"] = (
+    # ---- headline: leads with the number that means something ---------------
+    ws.merge_cells(f"A{R_HEAD}:L{R_HEAD}")
+    ws[f"A{R_HEAD}"] = (
         f'=IF({N_WEEKS}=0,"No weeks entered yet — start on the Totals tab.",'
         f'"Week of "&TEXT($N$2,"mmmm d, yyyy")&":   "&'
-        f'TEXT($D$8,"{FMT_COUNT}")&" open repair tickets"&'
-        f'IF($F$8=""," (first week on record)",'
-        f'" ("&IF($F$8>0,"up "&TEXT($F$8,"{FMT_COUNT}"),'
-        f'IF($F$8<0,"down "&TEXT(-$F$8,"{FMT_COUNT}"),"unchanged"))&" "&$N$7&")")&'
-        f'".   PMs "&TEXT($D$12,"{FMT_COUNT}")&'
-        f'IF($F$12="","."," ("&IF($F$12>0,"up "&TEXT($F$12,"{FMT_COUNT}"),'
-        f'IF($F$12<0,"down "&TEXT(-$F$12,"{FMT_COUNT}"),"unchanged"))&").")&'
-        f'"   All open "&TEXT($D$16,"{FMT_COUNT}")&".")')
-    ws["A3"].font = Font(name=FONT, size=13, bold=True, color=INK)
-    ws["A3"].alignment = left
-    ws.row_dimensions[3].height = 24
+        f'TEXT($D${R_REP_ALL},"{FMT_COUNT}")&" open repair tickets"&'
+        f'IF($F${R_REP_ALL}=""," (first week on record)",'
+        f'" ("&{delta_phrase(f"$F${R_REP_ALL}")}&" "&$N$7&")")&'
+        f'".   PMs "&TEXT($D${R_PM_ALL},"{FMT_COUNT}")&'
+        f'IF($F${R_PM_ALL}="","."," ("&{delta_phrase(f"$F${R_PM_ALL}")}&").")&'
+        f'"   All open "&TEXT($D${R_ALL},"{FMT_COUNT}")&".")')
+    ws[f"A{R_HEAD}"].font = Font(name=FONT, size=13, bold=True, color=INK)
+    ws[f"A{R_HEAD}"].alignment = left
+    ws.row_dimensions[R_HEAD].height = 24
 
     # ---- warning band: empty (and therefore invisible) when all is well -----
-    ws.merge_cells("A4:L4")
-    ws["A4"] = (
+    ws.merge_cells(f"A{R_WARN}:L{R_WARN}")
+    ws[f"A{R_WARN}"] = (
         f'=IF(Totals!$F${R_SCALAR}>0,'
         f'"⚠  Two or more week blocks on the Totals tab carry the same date. '
         f'Fix that before sending this out — one of them is a phantom week.",'
@@ -481,103 +521,131 @@ def build_history(ws, last_date, link_cell):
         f'IF({N_WEEKS}>={LOG_ROWS},'
         f'"⚠  The weekly log is full. Add rows before entering another week — '
         f'see the Read Me tab.","")))')
-    paint(ws, "A4:L4",
+    paint(ws, f"A{R_WARN}:L{R_WARN}",
           font=Font(name=FONT, size=11, bold=True, color=WARN_INK),
           align=Alignment(vertical="center", wrap_text=True))
-    ws.conditional_formatting.add("A4:L4", Rule(
-        type="expression", formula=['LEN($A$4)>0'],
+    ws.conditional_formatting.add(f"A{R_WARN}:L{R_WARN}", Rule(
+        type="expression", formula=[f"LEN($A${R_WARN})>0"],
         dxf=DifferentialStyle(fill=PatternFill(bgColor=WARN_FILL)), stopIfTrue=True))
-    ws.row_dimensions[4].height = 22
+    ws.row_dimensions[R_WARN].height = 22
 
     # ---- scorecard ----------------------------------------------------------
-    ws.merge_cells("A5:C5")
-    for col, text in (("A", ""), ("D", "This week"), ("E", "Previous entry"),
+    ws.merge_cells(f"A{R_SC_HEAD}:C{R_SC_HEAD}")
+    for col, text in (("A", ""), ("D", "This week"), ("E", "Previous"),
                       ("F", "Change"), ("G", "4-week avg")):
-        ws[f"{col}5"] = text
-    paint(ws, "A5:G5",
+        ws[f"{col}{R_SC_HEAD}"] = text
+    paint(ws, f"A{R_SC_HEAD}:G{R_SC_HEAD}",
           fill=PatternFill("solid", fgColor=HEAD_FILL),
-          font=Font(name=FONT, size=11, bold=True, color=INK),
+          font=Font(name=FONT, size=10, bold=True, color=INK),
           align=centre, border=Border(bottom=thin))
-    ws["A5"].alignment = left
+    ws.row_dimensions[R_SC_HEAD].height = 18
 
-    for row, label, col, emphasis in SCORECARD:
-        ws.merge_cells(f"A{row}:C{row}")
-        ws[f"A{row}"] = label
-        size = {"hero": 14, "strong": 12}.get(emphasis, 11)
-        bold = emphasis is not None
-        ws[f"D{row}"] = f'=IF({N_WEEKS}=0,"",INDEX({rng(col)},{N_WEEKS}))'
-        ws[f"E{row}"] = f'=IF({N_WEEKS}<2,"",INDEX({rng(col)},{N_WEEKS}-1))'
-        ws[f"F{row}"] = f'=IF(OR(D{row}="",E{row}=""),"",D{row}-E{row})'
-        ws[f"G{row}"] = (f'=IF({N_WEEKS}=0,"",AVERAGE('
-                         f'INDEX({rng(col)},MAX(1,{N_WEEKS}-3)):'
-                         f'INDEX({rng(col)},{N_WEEKS})))')
-        paint(ws, f"A{row}:C{row}",
-              font=Font(name=FONT, size=size, bold=bold, color=INK), align=left)
-        paint(ws, f"D{row}:G{row}",
-              font=Font(name=FONT, size=size, bold=bold, color=INK),
-              align=centre, fmt=FMT_COUNT)
-        ws[f"F{row}"].number_format = FMT_CHANGE
-        if emphasis:
-            fill = PatternFill("solid",
-                               fgColor="FFE4EDF9" if emphasis == "hero" else BAND)
-            paint(ws, f"A{row}:G{row}", fill=fill,
-                  border=Border(top=thin, bottom=thin))
-            ws[f"A{row}"].alignment = left
-            for c in "DEFG":
-                ws[f"{c}{row}"].alignment = centre
-        ws.row_dimensions[row] = ws.row_dimensions[row]
-        ws.row_dimensions[row].height = {"hero": 24, "strong": 20}.get(emphasis, 17)
+    for head_row, heading, gloss, rows in SC_GROUPS:
+        ws.merge_cells(f"A{head_row}:G{head_row}")
+        ws[f"A{head_row}"] = CellRichText(
+            TextBlock(InlineFont(rFont=FONT, sz=10, b=True, color=INK), heading),
+            TextBlock(InlineFont(rFont=FONT, sz=10, i=True, color=INK_SOFT),
+                      "   " + gloss))
+        paint(ws, f"A{head_row}:G{head_row}",
+              border=Border(bottom=Side(style="hair", color=RULE)),
+              align=Alignment(horizontal="left", vertical="bottom"))
+        ws.row_dimensions[head_row].height = 20
 
-    ws.merge_cells("A17:G17")
-    ws["A17"] = ("▲ = more open than the previous entry   ·   ▼ = fewer.   "
-                 "Only the repair rows are coloured: PMs jump whenever the "
-                 "maintenance system releases a batch, which is not a backlog "
-                 "problem, so repair tickets are the line to watch.")
-    ws["A17"].font = Font(name=FONT, size=10, italic=True, color=INK_SOFT)
-    ws["A17"].alignment = Alignment(vertical="center", wrap_text=True)
-    ws.row_dimensions[17].height = 26
+        for row, label, col, emphasis in rows:
+            ws.merge_cells(f"A{row}:C{row}")
+            ws[f"A{row}"] = label
+            size = {"hero": 14, "strong": 12}.get(emphasis, 11)
+            bold = emphasis is not None
+            ws[f"D{row}"] = f'=IF({N_WEEKS}=0,"",INDEX({rng(col)},{N_WEEKS}))'
+            ws[f"E{row}"] = f'=IF({N_WEEKS}<2,"",INDEX({rng(col)},{N_WEEKS}-1))'
+            ws[f"F{row}"] = f'=IF(OR(D{row}="",E{row}=""),"",D{row}-E{row})'
+            ws[f"G{row}"] = (f'=IF({N_WEEKS}=0,"",AVERAGE('
+                             f'INDEX({rng(col)},MAX(1,{N_WEEKS}-3)):'
+                             f'INDEX({rng(col)},{N_WEEKS})))')
+            paint(ws, f"A{row}:C{row}",
+                  font=Font(name=FONT, size=size, bold=bold, color=INK),
+                  align=Alignment(horizontal="left", vertical="center", indent=1))
+            paint(ws, f"D{row}:G{row}",
+                  font=Font(name=FONT, size=size, bold=bold, color=INK),
+                  align=centre, fmt=FMT_COUNT)
+            ws[f"F{row}"].number_format = FMT_CHANGE
+            if emphasis:
+                fill = PatternFill("solid",
+                                   fgColor="FFE4EDF9" if emphasis == "hero" else BAND)
+                paint(ws, f"A{row}:G{row}", fill=fill,
+                      border=Border(top=thin, bottom=thin))
+            ws.row_dimensions[row].height = {"hero": 24, "strong": 20}.get(emphasis, 17)
 
-    ws.merge_cells("A18:G18")
-    ws["A18"] = (f'=HYPERLINK("#Totals!"&ADDRESS({R_BV_REP},Totals!$B${R_SCALAR},4),'
-                 f'"► Enter this week\'s counts on the Totals tab")')
-    ws["A18"].font = Font(name=FONT, size=11, bold=True,
-                          color="FF0563C1", underline="single")
-    ws["A18"].alignment = left
+    ws.merge_cells(f"A{R_LEGEND}:G{R_LEGEND}")
+    ws[f"A{R_LEGEND}"] = ("▲ more open than the previous entry   ▼ fewer   ·   "
+                          "only repair tickets are coloured red or green")
+    ws[f"A{R_LEGEND}"].font = Font(name=FONT, size=9, italic=True, color=INK_SOFT)
+    ws[f"A{R_LEGEND}"].alignment = left
+
+    ws.merge_cells(f"A{R_JUMP}:G{R_JUMP}")
+    ws[f"A{R_JUMP}"] = (f'=HYPERLINK("#Totals!"&ADDRESS({R_BV_REP},Totals!$B${R_SCALAR},4),'
+                        f'"► Enter this week\'s counts on the Totals tab")')
+    ws[f"A{R_JUMP}"].font = Font(name=FONT, size=11, bold=True,
+                                 color="FF0563C1", underline="single")
+    ws[f"A{R_JUMP}"].alignment = left
+
+    # ---- email-ready summary, beside the scorecard, above the fold ---------
+    box_first = EMAIL_BOX.split(":")[0]
+    ws.merge_cells(f"I{R_SC_HEAD}:L{R_SC_HEAD}")
+    ws[f"I{R_SC_HEAD}"] = "FOR THE WEEKLY EMAIL  —  copy the box, paste with Keep Text Only"
+    paint(ws, f"I{R_SC_HEAD}:L{R_SC_HEAD}",
+          fill=PatternFill("solid", fgColor=HEAD_FILL),
+          font=Font(name=FONT, size=10, bold=True, color=INK),
+          align=left, border=Border(bottom=thin))
+    ws.merge_cells(EMAIL_BOX)
+    ws[box_first] = (
+        f'=IF({N_WEEKS}=0,"Enter a week on the Totals tab and this fills in.",'
+        f'"Open work orders — week of "&TEXT($N$2,"mm/dd/yyyy")&CHAR(10)&CHAR(10)&'
+        f'"Repair tickets: "&TEXT($D${R_REP_ALL},"{FMT_COUNT}")&"  ("&{chg_text(f"$F${R_REP_ALL}")}&'
+        f'IF($N$7="",""," "&$N$7)&")"&CHAR(10)&'
+        f'"PMs: "&TEXT($D${R_PM_ALL},"{FMT_COUNT}")&"  ("&{chg_text(f"$F${R_PM_ALL}")}&")"&CHAR(10)&'
+        f'"All open: "&TEXT($D${R_ALL},"{FMT_COUNT}")&"  ("&{chg_text(f"$F${R_ALL}")}&")"&CHAR(10)&CHAR(10)&'
+        f'"Burnsville: "&TEXT($D${R_ALL_BV},"{FMT_COUNT}")&"  ("&{chg_text(f"$F${R_ALL_BV}")}&")"&CHAR(10)&'
+        f'"Lakeville: "&TEXT($D${R_ALL_LV},"{FMT_COUNT}")&"  ("&{chg_text(f"$F${R_ALL_LV}")}&")"&CHAR(10)&CHAR(10)&'
+        f'"Full history and charts: "&$N$5)')
+    paint(ws, EMAIL_BOX,
+          fill=PatternFill("solid", fgColor="FFFBFBF9"),
+          border=Border(left=thin, right=thin, top=thin, bottom=thin),
+          font=Font(name=FONT, size=11, color=INK))
+    ws[box_first].alignment = Alignment(vertical="top", wrap_text=True)
 
     # ---- section bands ------------------------------------------------------
-    for row, text in ((19, f"TREND — the most recent {CHART_WEEKS} weeks "
-                           f"(every week is in the log below)"),
-                      (54, "WEEKLY LOG — one row per week, oldest first")):
+    for row, text in ((R_TREND, f"TREND — the most recent {CHART_WEEKS} weeks   ·   "
+                                "blue = repair tickets   ·   orange = PMs   ·   "
+                                "grey = all open   ·   every week is in the log below"),
+                      (R_LOG_BAND, "WEEKLY LOG — one row per week, oldest first")):
         ws.merge_cells(f"A{row}:L{row}")
         ws[f"A{row}"] = text
         paint(ws, f"A{row}:L{row}",
               fill=PatternFill("solid", fgColor=BAND),
-              font=Font(name=FONT, size=11, bold=True, color=INK_SOFT),
+              font=Font(name=FONT, size=10, bold=True, color=INK_SOFT),
               align=left)
         ws.row_dimensions[row].height = 20
 
-    # ---- email-ready summary ------------------------------------------------
-    ws.merge_cells("F37:L51")
-    ws["F37"] = (
-        f'=IF({N_WEEKS}=0,"Enter a week on the Totals tab and this fills in.",'
-        f'"Open work orders — week of "&TEXT($N$2,"mm/dd/yyyy")&CHAR(10)&CHAR(10)&'
-        f'"Repair tickets: "&TEXT($D$8,"{FMT_COUNT}")&"  ("&{chg_text("$F$8")}&'
-        f'IF($N$7="",""," "&$N$7)&")"&CHAR(10)&'
-        f'"PMs: "&TEXT($D$12,"{FMT_COUNT}")&"  ("&{chg_text("$F$12")}&")"&CHAR(10)&'
-        f'"All open: "&TEXT($D$16,"{FMT_COUNT}")&"  ("&{chg_text("$F$16")}&")"&CHAR(10)&CHAR(10)&'
-        f'"Burnsville: "&TEXT($D$14,"{FMT_COUNT}")&"  ("&{chg_text("$F$14")}&")"&CHAR(10)&'
-        f'"Lakeville: "&TEXT($D$15,"{FMT_COUNT}")&"  ("&{chg_text("$F$15")}&")"&CHAR(10)&CHAR(10)&'
-        f'"Full history and charts: "&$N$5)')
-    paint(ws, "F37:L51",
-          fill=PatternFill("solid", fgColor="FFFBFBF9"),
-          border=Border(left=thin, right=thin, top=thin, bottom=thin),
-          font=Font(name=FONT, size=11, color=INK))
-    ws["F37"].alignment = Alignment(vertical="top", wrap_text=True)
-
-    ws.merge_cells("F36:L36")
-    ws["F36"] = "COPY THIS INTO THE WEEKLY EMAIL  —  click the cell, copy, then in Outlook paste with Keep Text Only"
-    ws["F36"].font = Font(name=FONT, size=10, bold=True, color=INK_SOFT)
-    ws["F36"].alignment = left
+    # ---- recent notes, beside the third chart -------------------------------
+    ws.merge_cells(f"G{R_NOTES_HEAD}:L{R_NOTES_HEAD}")
+    ws[f"G{R_NOTES_HEAD}"] = (f"NOTES — the most recent {NOTES_SHOWN} weeks  "
+                              "(type them on the Totals tab)")
+    paint(ws, f"G{R_NOTES_HEAD}:L{R_NOTES_HEAD}",
+          fill=PatternFill("solid", fgColor=HEAD_FILL),
+          font=Font(name=FONT, size=10, bold=True, color=INK),
+          align=left, border=Border(bottom=thin))
+    for i in range(NOTES_SHOWN):
+        r = R_NOTES_HEAD + 1 + i
+        k = f"{N_WEEKS}-{i}"
+        ws.merge_cells(f"G{r}:L{r}")
+        ws[f"G{r}"] = (f'=IF({k}<1,"",TEXT(INDEX({rng(COL_WEEK)},{k}),"mm/dd/yy")&'
+                       f'"      "&IF(INDEX({rng(COL_NOTE)},{k})="","—",'
+                       f'INDEX({rng(COL_NOTE)},{k})))')
+        paint(ws, f"G{r}:L{r}",
+              font=Font(name=FONT, size=10, color=INK),
+              align=Alignment(horizontal="left", vertical="center"),
+              border=Border(bottom=Side(style="hair", color=RULE)))
 
     # ---- the log ------------------------------------------------------------
     headers = ["Count Date", "Burnsville Repair Tickets", "Burnsville PMs",
@@ -613,7 +681,7 @@ def build_history(ws, last_date, link_cell):
                                           showFirstColumn=False, showLastColumn=False)
     ws.add_table(table)
 
-    # ---- conditional formatting on every change cell ------------------------
+    # ---- conditional formatting on the coloured change cells ---------------
     up = DifferentialStyle(font=Font(color=UP_RED, bold=True))
     down = DifferentialStyle(font=Font(color=DOWN_GREEN, bold=True))
     for rng_ in (COLOURED_CHANGE, f"{COL_CHG}{LOG_FIRST}:{COL_CHG}{LOG_LAST}"):
@@ -625,8 +693,11 @@ def build_history(ws, last_date, link_cell):
             type="expression", formula=[f"AND(ISNUMBER({first}),{first}<0)"],
             dxf=down, stopIfTrue=False))
 
-    for r in list(range(20, 36)) + list(range(37, 53)):
-        ws.row_dimensions[r].height = 15
+    # pin the rows the charts sit on so the fixed-size charts cannot creep over
+    # the bands below them
+    for r in range(R_CHARTS_1, R_PRINT_END + 1):
+        if r not in (R_NOTES_HEAD,):
+            ws.row_dimensions[r].height = 15
 
     ws.protection.sheet = True          # every cell here is calculated
     ws.protection.formatCells = False
@@ -639,36 +710,55 @@ def build_history(ws, last_date, link_cell):
     ws.sheet_properties.pageSetUpPr.fitToPage = True
     ws.page_setup.fitToWidth = 1
     ws.page_setup.fitToHeight = 0
-    ws.print_area = "A1:L53"          # the dashboard: one clean landscape page
+    ws.print_area = f"A1:L{R_PRINT_END}"   # the dashboard: one landscape page
 
 
 # ---------------------------------------------------------------- charts
 
+SERIES_COLS = {"Week": COL_WEEK,
+               "BVR": COL_BVR, "BVP": COL_BVP, "BVT": COL_BVT,
+               "LVR": COL_LVR, "LVP": COL_LVP, "LVT": COL_LVT,
+               "REPT": COL_REPT, "PMT": COL_PMT, "CO": COL_COMB}
+
 
 def add_named_ranges(wb, ws):
     # A moving window over the most recent CHART_WEEKS entries. INDEX():INDEX()
-    # rather than OFFSET so nothing here is volatile; the full history stays in
-    # the log below, which is what the window keeps the charts readable against.
-    n = (f"COUNT(History!${COL_WEEK}${LOG_FIRST}:${COL_WEEK}${LOG_LAST})")
+    # rather than OFFSET so nothing here is volatile. This is the same construct
+    # the original workbook used, which Excel evaluated and cached correctly.
+    n = f"COUNT(History!${COL_WEEK}${LOG_FIRST}:${COL_WEEK}${LOG_LAST})"
 
     def dyn(col):
         span = f"History!${col}${LOG_FIRST}:${col}${LOG_LAST}"
         return (f"INDEX({span},MAX(1,{n}-{CHART_WEEKS - 1})):"
                 f"INDEX({span},MAX(1,{n}))")
 
-    series_cols = {"Week": COL_WEEK,
-                   "BVR": COL_BVR, "BVP": COL_BVP, "BVT": COL_BVT,
-                   "LVR": COL_LVR, "LVP": COL_LVP, "LVT": COL_LVT,
-                   "REPT": COL_REPT, "PMT": COL_PMT, "CO": COL_COMB}
-    for key, col in series_cols.items():
+    for key, col in SERIES_COLS.items():
         ws.defined_names.add(DefinedName(f"chart_{key}", attr_text=dyn(col)))
-    for key in series_cols:
+    for key in SERIES_COLS:
         if key == "Week":
             continue
         ws.defined_names.add(DefinedName(
             f"last_{key}",
             attr_text=(f"IF(History!chart_Week=MAX(History!chart_Week),"
                        f"History!chart_{key},NA())")))
+
+
+def text_props(size_pt, colour="6A6A66", bold=False):
+    """Font for chart text. Text wears ink, never the series colour."""
+    def cp():
+        return CharacterProperties(sz=int(size_pt * 100), b=bold, solidFill=colour)
+    return RichText(bodyPr=RichTextProperties(),
+                    p=[Paragraph(pPr=ParagraphProperties(defRPr=cp()),
+                                 endParaRPr=cp())])
+
+
+def chart_title(text):
+    def cp():
+        return CharacterProperties(sz=1100, b=True, solidFill="262626")
+    para = Paragraph(pPr=ParagraphProperties(defRPr=cp()),
+                     r=[RegularTextRun(rPr=cp(), t=text)])
+    return Title(tx=Text(rich=RichText(bodyPr=RichTextProperties(), p=[para])),
+                 overlay=False)
 
 
 def line_series(name, ref_name, colour, width_emu=25400, marker_size=6):
@@ -687,6 +777,7 @@ def line_series(name, ref_name, colour, width_emu=25400, marker_size=6):
 
 
 def label_series(ref_name, position):
+    """An invisible series that carries only the latest value, as a label."""
     s = Series()
     s.val = NumDataSource(NumRef(f=f"History!{ref_name}"))
     s.cat = AxDataSource(numRef=NumRef(f="History!chart_Week"))
@@ -694,18 +785,19 @@ def label_series(ref_name, position):
     s.marker = Marker(symbol="none")
     s.dLbls = DataLabelList(showVal=True, showSerName=False, showCatName=False,
                             showLegendKey=False, showBubbleSize=False,
-                            showPercent=False, dLblPos=position, numFmt=FMT_COUNT)
+                            showPercent=False, dLblPos=position, numFmt=FMT_COUNT,
+                            txPr=text_props(9, "262626", bold=True))
     s.smooth = False
     return s
 
 
 def make_chart(title, specs, anchor, ws):
-    """specs: list of (legend name, chart_ name, last_ name, colour, label position)"""
+    """specs: list of (legend name, series key, colour, label position)"""
     ch = LineChart()
-    ch.title = title
+    ch.title = chart_title(title)
     ch.style = None
-    ch.height = 7.5
-    ch.width = 12.5
+    ch.width = CHART_W_CM
+    ch.height = CHART_H_CM
     ch.y_axis.title = None
     ch.x_axis.title = None
     ch.y_axis.scaling.min = 0
@@ -713,17 +805,20 @@ def make_chart(title, specs, anchor, ws):
     ch.y_axis.delete = False
     ch.y_axis.numFmt = FMT_COUNT
     ch.x_axis.numFmt = "m/d"
+    ch.x_axis.txPr = text_props(9)
+    ch.y_axis.txPr = text_props(9)
     ch.y_axis.majorGridlines.spPr = GraphicalProperties(
         ln=LineProperties(solidFill="E8E8E4", w=9525))
     ch.x_axis.majorGridlines = None
     ch.legend.position = "t"
     ch.legend.overlay = False
+    ch.legend.txPr = text_props(9, "262626")
 
-    for i, (name, cname, _, colour, _) in enumerate(specs):
+    for name, key, colour, _ in specs:
         w = 31750 if colour == TOTAL_INK else 25400
-        ch.series.append(line_series(name, cname, colour, width_emu=w))
-    for i, (_, _, lname, _, pos) in enumerate(specs):
-        ch.series.append(label_series(lname, pos))
+        ch.series.append(line_series(name, f"chart_{key}", colour, width_emu=w))
+    for _, key, _, pos in specs:
+        ch.series.append(label_series(f"last_{key}", pos))
     # hide the label-only series from the legend
     ch.legend.legendEntry = [LegendEntry(idx=len(specs) + i, delete=True)
                              for i in range(len(specs))]
@@ -740,25 +835,12 @@ def build_charts(ws):
     Lakeville runs an order of magnitude above Burnsville, so any chart holding
     both plants' PM counts flattens Burnsville onto the axis.
     """
-    panels = [
-        ("Both plants — open work orders", "A20",
-         [("Repair tickets", "REPT", REPAIR_INK, "t"),
-          ("PMs", "PMT", PM_INK, "b"),
-          ("All open", "CO", TOTAL_INK, "t")]),
-        ("Burnsville — open work orders", "F20",
-         [("Repair tickets", "BVR", REPAIR_INK, "t"),
-          ("PMs", "BVP", PM_INK, "b"),
-          ("All open", "BVT", TOTAL_INK, "t")]),
-        ("Lakeville — open work orders", "A37",
-         [("Repair tickets", "LVR", REPAIR_INK, "t"),
-          ("PMs", "LVP", PM_INK, "b"),
-          ("All open", "LVT", TOTAL_INK, "t")]),
-    ]
-    for title, anchor, specs in panels:
-        make_chart(title,
-                   [(name, f"chart_{key}", f"last_{key}", colour, pos)
-                    for name, key, colour, pos in specs],
-                   anchor, ws)
+    metric = lambda rep, pm, tot: [("Repair tickets", rep, REPAIR_INK, "t"),
+                                   ("PMs", pm, PM_INK, "b"),
+                                   ("All open", tot, TOTAL_INK, "t")]
+    make_chart("Both plants", metric("REPT", "PMT", "CO"), f"A{R_CHARTS_1}", ws)
+    make_chart("Burnsville", metric("BVR", "BVP", "BVT"), f"G{R_CHARTS_1}", ws)
+    make_chart("Lakeville", metric("LVR", "LVP", "LVT"), f"A{R_CHARTS_2}", ws)
 
 
 # ---------------------------------------------------------------- Read Me
@@ -783,12 +865,13 @@ README = [
           "all four are in, so a half-filled block is left out rather than reported as "
           "zeros.", None),
     ("N", "If a number moved for a reason worth remembering, type it into the NOTE row "
-          "of that same block. It shows up in the Notes column of the weekly log.", None),
+          "of that same block. It shows up beside the charts on the History tab and in "
+          "the Notes column of the weekly log.", None),
     ("N", "Go to the History tab and read the top. If a red bar has appeared under the "
           "headline, fix what it names before you send anything.", None),
-    ("N", "Copy the email box (to the right of the charts) into your weekly email. In "
-          "Outlook, paste with Keep Text Only, or you will paste a one-cell table. "
-          "Send the file link with it.", None),
+    ("N", "Copy the email box (top right of the History tab, beside the scorecard) "
+          "into your weekly email. In Outlook, paste with Keep Text Only, or you will "
+          "paste a one-cell table. Send the file link with it.", None),
     ("S", None, None),
 
     ("H", "READING THE NUMBERS", None),
@@ -843,8 +926,8 @@ README = [
     ("S", None, None),
 
     ("H", "FILL THESE IN", None),
-    ("Y", "Where this file lives (paste the SharePoint link)", ""),
-    ("Y", "Name of the report the counts come from", ""),
+    ("Y", "SharePoint link to this file", ""),
+    ("Y", "Report the counts come from", ""),
     ("S", None, None),
 
     ("H", "THE SHEETS ARE PROTECTED", None),
@@ -907,6 +990,10 @@ README = [
           "added the email box, this tab, two years of pre-built weeks, checks for "
           "part-filled and duplicate weeks, sheet protection, and block lookup that "
           "no longer depends on counting columns.", None),
+    ("P", "2026-09-22 (evening) — the file now stores its computed results, so email "
+          "and phone previews show the real dashboard instead of blanks. The "
+          "scorecard is grouped under repair tickets, PMs and all open; the email box "
+          "sits beside it; the latest notes appear beside the charts.", None),
 ]
 
 
@@ -923,7 +1010,7 @@ def readme_layout():
     return rows
 
 
-LINK_LABEL = "Where this file lives (paste the SharePoint link)"
+LINK_LABEL = "SharePoint link to this file"
 
 
 def build_readme(ws, last_date):
@@ -1031,6 +1118,155 @@ def strip_table_autofilter(path):
     shutil.move(tmp, path)
 
 
+def bake_cached_values(path):
+    """Store a computed result beside every formula, as Excel does when it saves.
+
+    openpyxl writes formulas with no results. Excel recalculates on open (the
+    workbook asks it to), but anything that only reads stored results — Outlook's
+    attachment preview, iPhone Quick Look, SharePoint thumbnails, LibreOffice's
+    chart import — would otherwise show a blank dashboard and empty charts.
+
+    Results come from the `formulas` package, which evaluates the workbook the way
+    Excel would. Chart caches are written in the exact shape Excel itself wrote in
+    the workbook this one replaces. Skipped, with a note, if `formulas` is absent.
+    """
+    try:
+        import warnings
+        warnings.filterwarnings("ignore")
+        import formulas
+        from formulas.tokens.operand import XlError
+    except ImportError:
+        print("note: `formulas` is not installed, so no results were stored. Open and "
+              "save the file once in Excel before sending it, or previews show blanks.")
+        return
+
+    solution = formulas.ExcelModel().loads(path).finish().calculate()
+    values = {}
+    for key, rng in solution.items():
+        m = re.match(r"'\[.*?\](.+?)'!([A-Z]+\d+)$", key)
+        if not m:
+            continue
+        try:
+            values[(m.group(1).upper(), m.group(2))] = rng.value[0, 0]
+        except Exception:
+            pass
+
+    def encode(v):
+        """-> (type attribute or None, text) or None if the value is unusable."""
+        if isinstance(v, XlError):
+            return "e", str(v)
+        if isinstance(v, (bool,)) or type(v).__name__ == "bool_":
+            return "b", "1" if v else "0"
+        if isinstance(v, str):
+            return "str", v
+        try:
+            f = float(v)
+        except (TypeError, ValueError):
+            return None
+        return None, (str(int(f)) if f.is_integer() else repr(f))
+
+    hyperlink_label = re.compile(r'HYPERLINK\(.*,"((?:[^"]|"")*)"\)\s*$', re.S)
+
+    with zipfile.ZipFile(path) as z:
+        parts = {i.filename: z.read(i.filename) for i in z.infolist()}
+        infos = {i.filename: i for i in z.infolist()}
+
+    wb_xml = parts["xl/workbook.xml"].decode()
+    rels = parts["xl/_rels/workbook.xml.rels"].decode()
+    targets = {}
+    for rel in re.findall(r"<Relationship\b[^>]*>", rels):
+        rid = re.search(r'\bId="([^"]+)"', rel)
+        target = re.search(r'\bTarget="([^"]+)"', rel)
+        if rid and target:
+            targets[rid.group(1)] = target.group(1)
+    sheets = {}
+    for name, rid in re.findall(r'<sheet name="([^"]+)" sheetId="\d+"[^>]*r:id="(rId\d+)"',
+                                wb_xml):
+        sheets[name] = "xl/" + targets[rid].lstrip("/").replace("xl/", "", 1)
+
+    from xml.sax.saxutils import escape, unescape
+    stored = skipped = 0
+    for name, part in sheets.items():
+        xml = parts[part].decode()
+
+        def fill(m):
+            nonlocal stored, skipped
+            coord, attrs, formula = m.group(1), m.group(2), m.group(3)
+            v = values.get((name.upper(), coord))
+            label = hyperlink_label.search(unescape(formula))
+            if formula.startswith("HYPERLINK(") and label:
+                v = label.group(1).replace('""', '"')   # what Excel displays
+            enc = encode(v) if v is not None else None
+            if enc is None:
+                skipped += 1
+                return m.group(0)
+            t, text = enc
+            attrs = re.sub(r'\s+t="[^"]*"', "", attrs)
+            if t:
+                attrs += f' t="{t}"'
+            stored += 1
+            return f'<c r="{coord}"{attrs}><f>{formula}</f><v>{escape(text)}</v></c>'
+
+        xml = re.sub(r'<c r="([A-Z]+\d+)"([^>]*)><f>(.*?)</f><v\s*/></c>',
+                     fill, xml, flags=re.S)
+        parts[part] = xml.encode()
+
+    # ---- chart caches -------------------------------------------------------
+    n = int(float(values.get(("HISTORY", "N1"), 0) or 0))
+    first, last = max(1, n - (CHART_WEEKS - 1)), max(1, n)
+    rows = list(range(LOG_FIRST + first - 1, LOG_FIRST + last))
+
+    def column_points(col):
+        pts = []
+        for i, r in enumerate(rows):
+            v = values.get(("HISTORY", f"{col}{r}"))
+            if isinstance(v, str) or v is None or isinstance(v, XlError):
+                continue
+            pts.append((i, float(v)))
+        return pts
+
+    weeks = column_points(COL_WEEK)
+    latest = max((v for _, v in weeks), default=None)
+
+    def cache(ref):
+        key = ref.split("!")[1]
+        kind, series = key.split("_", 1)
+        if kind == "chart":
+            pts = column_points(SERIES_COLS[series])
+            code = "m/d/yyyy" if series == "Week" else FMT_COUNT
+            body = "".join(f'<pt idx="{i}"><v>{int(v) if v.is_integer() else v}</v></pt>'
+                           for i, v in pts)
+        else:  # last_: only the latest week carries a value
+            # Excel evaluates these as #N/A everywhere but the latest point and
+            # skips them. Previewers that draw from this cache do not all skip a
+            # cached "#N/A" (LibreOffice plots it as a labelled 0), so the cache
+            # simply leaves those points out, which every renderer treats as a gap.
+            vals = dict(column_points(SERIES_COLS[series]))
+            code = "General"
+            body = ""
+            for i, w in weeks:
+                v = vals.get(i)
+                if w == latest and v is not None:
+                    shown = int(v) if v.is_integer() else v
+                    body += f'<pt idx="{i}"><v>{shown}</v></pt>'
+        return (f"<numCache><formatCode>{escape(code)}</formatCode>"
+                f'<ptCount val="{len(rows)}"/>{body}</numCache>')
+
+    for part in [p for p in parts if p.startswith("xl/charts/chart")]:
+        xml = parts[part].decode()
+        xml = re.sub(r"<numRef><f>(History![A-Za-z_]+)</f></numRef>",
+                     lambda m: f"<numRef><f>{m.group(1)}</f>{cache(m.group(1))}</numRef>",
+                     xml)
+        parts[part] = xml.encode()
+
+    tmp = path + ".tmp"
+    with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as out:
+        for fname, data in parts.items():
+            out.writestr(infos[fname], data)
+    shutil.move(tmp, path)
+    print(f"stored results for {stored} formulas ({skipped} left for Excel to fill)")
+
+
 # ---------------------------------------------------------------- main
 
 
@@ -1061,6 +1297,7 @@ def main(out="Open_WOs_tracker.xlsx"):
     wb.active = 0
     wb.save(out)
     strip_table_autofilter(out)
+    bake_cached_values(out)
     print(f"wrote {out}: {len(dates)} weekly blocks, {LOG_ROWS} log rows, "
           f"3 charts, {len(history.defined_names)} defined names")
 
