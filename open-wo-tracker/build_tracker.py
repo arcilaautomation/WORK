@@ -297,6 +297,12 @@ def build_totals(ws, dates):
         cell.font = note_font
         cell.alignment = Alignment(vertical="center", wrap_text=True)
         ws.row_dimensions[r].height = 30
+    marker = ws.cell(24, 1,
+                     "Rows 30–35 below are hidden. They hold the bookkeeping that "
+                     "puts each week on the History tab — leave them alone.")
+    marker.font = Font(name=FONT, size=9, italic=True, color=INK_SOFT)
+    ws.merge_cells(start_row=24, start_column=1, end_row=24, end_column=6)
+
     jump = ws.cell(22, 1,
                    f'=HYPERLINK("#Totals!"&ADDRESS({R_BV_REP},$B${R_SCALAR},4),'
                    f'"► Jump to this week\'s block")')
@@ -310,6 +316,7 @@ def build_totals(ws, dates):
         ws.conditional_formatting.add(rng, Rule(
             type="expression",
             formula=[f'AND(A${R_DATE}="DATE",ISBLANK(A{first}),'
+                     f'ISNUMBER(INDEX($A${R_DATE}:${SCAN}${R_DATE},COLUMN()+1)),'
                      f'INDEX($A${R_DATE}:${SCAN}${R_DATE},COLUMN()+1)+5<=TODAY())'],
             dxf=yellow_dxf, stopIfTrue=False))
     red_dxf = DifferentialStyle(fill=PatternFill(bgColor=WARN_FILL),
@@ -454,7 +461,7 @@ def build_history(ws, last_date, link_cell):
         f'" ("&IF($F$8>0,"up "&TEXT($F$8,"{FMT_COUNT}"),'
         f'IF($F$8<0,"down "&TEXT(-$F$8,"{FMT_COUNT}"),"unchanged"))&" "&$N$7&")")&'
         f'".   PMs "&TEXT($D$12,"{FMT_COUNT}")&'
-        f'IF($F$12=""," "," ("&IF($F$12>0,"up "&TEXT($F$12,"{FMT_COUNT}"),'
+        f'IF($F$12="","."," ("&IF($F$12>0,"up "&TEXT($F$12,"{FMT_COUNT}"),'
         f'IF($F$12<0,"down "&TEXT(-$F$12,"{FMT_COUNT}"),"unchanged"))&").")&'
         f'"   All open "&TEXT($D$16,"{FMT_COUNT}")&".")')
     ws["A3"].font = Font(name=FONT, size=13, bold=True, color=INK)
@@ -554,7 +561,8 @@ def build_history(ws, last_date, link_cell):
     ws["F37"] = (
         f'=IF({N_WEEKS}=0,"Enter a week on the Totals tab and this fills in.",'
         f'"Open work orders — week of "&TEXT($N$2,"mm/dd/yyyy")&CHAR(10)&CHAR(10)&'
-        f'"Repair tickets: "&TEXT($D$8,"{FMT_COUNT}")&"  ("&{chg_text("$F$8")}&" "&$N$7&")"&CHAR(10)&'
+        f'"Repair tickets: "&TEXT($D$8,"{FMT_COUNT}")&"  ("&{chg_text("$F$8")}&'
+        f'IF($N$7="",""," "&$N$7)&")"&CHAR(10)&'
         f'"PMs: "&TEXT($D$12,"{FMT_COUNT}")&"  ("&{chg_text("$F$12")}&")"&CHAR(10)&'
         f'"All open: "&TEXT($D$16,"{FMT_COUNT}")&"  ("&{chg_text("$F$16")}&")"&CHAR(10)&CHAR(10)&'
         f'"Burnsville: "&TEXT($D$14,"{FMT_COUNT}")&"  ("&{chg_text("$F$14")}&")"&CHAR(10)&'
