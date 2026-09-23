@@ -8,7 +8,7 @@ directory with a `HANDOFF.md` as its living record.
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
-| `open-wo-tracker/` | Weekly open work order tracker for Burnsville + Lakeville | Open — needs a first open in real Excel and a SharePoint home, see its `HANDOFF.md` §6 |
+| `open-wo-tracker/` | Weekly open work order log for Burnsville + Lakeville | Open — the boss wants the plain weekly log; `Open_WOs_weekly_log.xlsx` goes out, see its `HANDOFF.md` §6 |
 
 ## Conventions
 

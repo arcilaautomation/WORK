@@ -19,8 +19,11 @@ else calculated, one dashboard to send out.
 
 | File | What it is |
 |---|---|
-| `Open_WOs_tracker.xlsx` | The workbook. This is the deliverable. |
-| `build_tracker.py` | Generates the workbook from scratch. Re-run it to rebuild; it is the authoritative description of every formula. |
+| `Open_WOs_weekly_log.xlsx` | **The file that goes out.** The boss's weekly log on its own: one table, one row per week. |
+| `build_weekly_log.py` | Makes `Open_WOs_weekly_log.xlsx` from `source/Open_WOs_w_graph.xlsx`. |
+| `source/Open_WOs_w_graph.xlsx` | The version the boss liked, as received 2026-09-23. Last saved in Excel 2026-09-21 22:35. |
+| `Open_WOs_tracker.xlsx` | The fuller dashboard built 2026-09-22 (scorecard, per-plant charts, Totals entry grid). Not in use; the boss preferred the plain log. |
+| `build_tracker.py` | Generates the dashboard workbook from scratch. |
 | `HANDOFF.md` | This file. |
 
 `python3 build_tracker.py Open_WOs_tracker.xlsx` rebuilds the file. It needs
@@ -126,15 +129,40 @@ Three tabs: **History** (dashboard + weekly log, the tab you send), **Totals**
   scenarios. **VERIFY** — still not opened in real Excel. First open is the
   outstanding check, now lower-risk given the original's evidence.
 
+- **2026-09-23** — The boss saw `Open_WOs_w_graph.xlsx`, an earlier version than
+  the one first reviewed here, and liked its weekly log but not the graph. The
+  boss's note: "We only need Lines 21,22,and 23 from sheet 1." Those lines are
+  the WeeklyLog table's header and its two weekly rows; the graph sits in rows
+  4 to 20. In that version the weekly counts are typed into the table and the
+  totals are Excel calculated columns, so the table stands on its own. Built
+  `Open_WOs_weekly_log.xlsx` by transforming that file rather than rebuilding it:
+  kept the table and its custom "Weekly Log Style" exactly, moved it to the top,
+  removed the title, the graph, the graph's named ranges and the Totals tab,
+  froze the header row, set the header to repeat when printed, and stored the
+  computed totals so previews show them. Verified: all 27 cells match lines 21 to
+  23 of the source in value, formula, font, colour, fill and number format;
+  column widths match; LibreOffice recalculated the 8 formulas with no errors and
+  matched every stored value; a simulated week of 09/28 filled in correctly
+  (totals 11 and 180, combined 191, change −101).
+
 ## 6. Action list
 
-1. **Open the file in Excel once and look at it.** Confirm the three charts draw,
-   the endpoint labels sit sensibly, and no "repaired records" dialog appears.
-   This is the one check the build environment could not perform.
-2. **Decide where it lives on SharePoint**, paste the link into the yellow cell on
-   the Read Me tab, and share the link view-only to readers and edit to whoever
-   updates it. Do not move or rename the file afterwards or the link breaks.
-3. **Name the source report** in the second yellow cell on the Read Me tab.
+**Weekly routine for the log** (`Open_WOs_weekly_log.xlsx`): type the date and
+the four counts in the row under the last week. Excel grows the table and fills
+in both plant totals, the combined total and the change on its own. The file
+opens with the cursor already on that row.
+
+
+1. **Open `Open_WOs_weekly_log.xlsx` in Excel once before sending it.** It is
+   the boss's own table with Excel's formatting kept byte-for-byte, so this is
+   a sanity check, not a risk: type a test week in the next row, confirm the
+   totals and the change fill in, then undo.
+2. **Put it on SharePoint** and send the link, view-only for readers and edit
+   for whoever updates it. Do not move or rename the file afterwards or the
+   link breaks.
+3. The dashboard version (`Open_WOs_tracker.xlsx`) is parked. If it is ever
+   revived: open it once in Excel and confirm the three charts draw, then fill
+   in the two yellow cells on its Read Me tab.
 4. **Confirm or kill the PM-batch hypothesis** in §3 before the framing gets
    repeated in the weekly email.
 5. To render or recalculate the workbook in a future cloud session, add
@@ -147,6 +175,8 @@ Three tabs: **History** (dashboard + weekly log, the tab you send), **Totals**
    what is open at the moment of the pull, not flow.
 
 ## 7. Open questions
+
+- Which report are the counts pulled from? Not named anywhere yet.
 
 - Is Monday the right count day, and is the count pulled at a consistent time of
   day? A count taken Monday morning and one taken Friday afternoon are not
