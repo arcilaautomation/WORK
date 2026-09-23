@@ -137,7 +137,12 @@ Three tabs: **History** (dashboard + weekly log, the tab you send), **Totals**
 3. **Name the source report** in the second yellow cell on the Read Me tab.
 4. **Confirm or kill the PM-batch hypothesis** in §3 before the framing gets
    repeated in the weekly email.
-5. Optional: if the weekly send becomes routine, consider whether the boss also
+5. To render or recalculate the workbook in a future cloud session, add
+   `apt-get install -y --no-install-recommends libreoffice-calc` to the cloud
+   environment's setup script (environment menu in the session title bar, then
+   Edit, then Setup script). The base image has LibreOffice's core but not its
+   spreadsheet component, so without it every `.xlsx` fails to load.
+6. Optional: if the weekly send becomes routine, consider whether the boss also
    wants work orders *closed* per week, which this file does not track — it counts
    what is open at the moment of the pull, not flow.
 
