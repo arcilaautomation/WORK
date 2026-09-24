@@ -8,6 +8,7 @@ directory with a `HANDOFF.md` as its living record.
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
+| `qts-tanks/` | QTS tanks (DeJong project): 18327 CIP tanks + 18445 egg balance tanks — equipment, PM plans, Aptean entry | Open — PD-TNK-001 entered, 18445 not yet; see the action list in its `HANDOFF.md` §6 |
 
 ## Conventions
 

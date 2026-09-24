@@ -1,0 +1,57 @@
+QTS 18445 EGG BALANCE TANKS - PM STEPS FOR APTEAN (SHORT VERSION FOR TECHS)
+Tanks: 18445-101-1 and 18445-101-2 (1,200 gal, insulated, Nord agitator 3HP @ 34 RPM)
+Source: QTS manual "Dejong QTS-18445-101-1 & 2" (in this folder), incl. Nord B1000 (gear unit) and B1091 (motor).
+Nord's weekly noise check is in the monthly PM; the 2-yr/10,000-hr oil change is step 3 of the semi-annual.
+
+
+========== MONTHLY PM ==========
+
+EGG BALANCE TANKS (18445) - MONTHLY PM
+Tank stays in service. Outside check only.
+1. Agitator running: listen for noise, vibration or heat at motor/gearbox.
+2. Agitator turns CLOCKWISE. No leak at top shaft seal.
+3. No oil leaks at gearbox. Motor fins/fan clean.
+4. Look for leaks at clamps, valves, manway and outlet.
+5. Can vent and anti-siphon clear. (Blocked vent can collapse tank.)
+6. Probes, cables, legs and outer shell OK. Labels in place.
+7. WO for anything found.
+
+
+========== SEMI-ANNUAL PM ==========
+
+EGG BALANCE TANKS (18445) - SEMI-ANNUAL PM
+LOTO agitator + pumps. Drain tank. MOVING PARTS - lock out agitator before opening manway. CONFINED SPACE - do not enter.
+1. Do monthly checks.
+2. Gearbox oil level: remove level plug - oil at bottom of hole. Top up with ISO VG220 mineral EP only - don't mix oils.
+3. Oil change if 2 yrs / 10,000 hrs since last: drain, refill ~5.3 qt VG220, clean breather/vent screw.
+4. Gearbox bolts and agitator bridge tight.
+5. Open manway. Flashlight check inside: shell, agitator, spray balls clear.
+6. Check bottom guide bearing and top shaft seal for wear. Replace if worn.
+7. Replace tri-clamp gaskets you opened. Replace manway gasket if worn.
+8. Clean can vent screen and anti-siphon cap.
+9. Remove tools. Close manway. Remove LOTO.
+10. Bump agitator - must turn CLOCKWISE.
+Parts: gaskets EG40E3.0 / EG40E4.0 / EG40E6.0 | manway gasket MW-RND-18-GSKT | shaft seal 6"x2" Delrin + O-ring VF753A-329 | guide bearing QTS-GB-3.0-DEL | oil: ISO VG220 mineral EP (Mobilgear 600 XP 220 or equal)
+
+
+========== NOT SCHEDULABLE AS MONTHLY/SEMI (NORD SERVICE) ==========
+
+- Every 4 years / 20,000 hrs: re-lubricate gearbox bearings (NORD service; grease Petamo GHY 133N).
+- Every 5 years: motor complete overhaul (NORD service).
+- Every 10 years: gearbox general overhaul (NORD service).
+
+
+========== MANUAL CHECK NOTES ==========
+
+- Manual is complete: cover, thank-you letter, Sec 1 care of stainless, Sec 2 passivation cert (1/26/2026, both tanks),
+  Sec 3 drawing 18445-101 rev F (as-built 3/17/2026), Sec 4 Nord vendor info (9 docs incl. full B1000/B1091 manual),
+  Sec 5 QTS + Nord warranties, Sec 6 spare parts list (PDF + XLSX).
+- OneDrive copy of the drawing (Desktop\Autobake Oven\QTS Tanks\18445-101 B.pdf) is old rev B - use rev F.
+- Manway gasket: drawing says 3A GRAY EPDM, spare parts list says MW-RND-18-GSKT black EPDM - confirm with QTS when ordering.
+- Oil: Nord order/nameplate = VG220 mineral EP, approx 5.3 qt (5.0 L) per gearbox (mounting M4). Approved: Mobilgear 600 XP 220,
+  Kluberoil GEM 1-220 N, Renolin CLP 220, Castrol Alpha EP 220. QTS also included a food-grade FM Gear Oil 220 (H1) data sheet.
+  Switching to food-grade oil needs NORD's OK and a full drain - never mix.
+- Warranty: QTS 2 yrs from ship date; Nord gear unit 1 yr from delivery (written notice required).
+- Nord unit: SK4282AFMH-100LP/4 CUS TW, order 204564740-100, ratio 52.20, mounting M4, 3HP @ 34 RPM, 230/460V TEFC, IP55.
+- No manuals for the level or temp probes (not QTS supply).
+- Contacts: NORD 888-314-6673 | QTS 262-361-4252, 24/7 emergency 262-720-6313.

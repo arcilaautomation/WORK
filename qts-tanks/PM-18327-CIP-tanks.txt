@@ -1,0 +1,21 @@
+CIP TANKS (PD-TNK-001) - MONTHLY PM
+Tanks stay in service. Outside check only.
+1. Look for leaks at clamps, valves, manway and outlet.
+2. Vent cap and anti-siphon clear. (Blocked vent can collapse tank.)
+3. Manway closed, gasket OK, prox sensor tight.
+4. Level/conductivity probes: no leaks, cables OK.
+5. Look for rust, stains, cracks or dents. Legs solid.
+6. WO for anything found.
+
+
+CIP TANKS (PD-TNK-001) - SEMI-ANNUAL PM
+LOTO CIP pumps + chem feed. Drain tank, let cool. Chem PPE. CONFINED SPACE - do not enter.
+1. Do monthly checks.
+2. Open manway. Flashlight check inside for pits, cracks, rust, stains.
+3. Replace tri-clamp gaskets at vent, anti-siphon and chem inlet. Replace bad clamps.
+4. Replace manway gasket if worn.
+5. Clean vent cap/screen and anti-siphon cap.
+6. Clean conductivity probe. Check level + conductivity readings.
+7. Remove tools. Close manway. Check prox. Remove LOTO.
+8. Tank must be at room temp before hot CIP.
+Parts: 3" gasket EG40E3.0 | 2" gasket EG40E2.0 | 18" manway gasket MW-RND-18-GSKT-3A-EPDM
