@@ -130,11 +130,11 @@ Omron slim relays, left to right: **20KA1, 21KA1, 21KA7, 21KA2, 21KA8**.
 
 | Relay | Wire on coil terminal | Drives (page 23) |
 |---|---|---|
-| 20KA1 | 2011 | not on page 23; function **VERIFY** (pump contactor?) |
+| 20KA1 | 2011 | not on page 23. Lights with every lever move (shared). A wire marked 1257 leaves its contact side. Function **VERIFY** (pump contactor?) |
 | 21KA1 | 2111 | 23Y3 + 23Y4, platforms open |
-| 21KA7 | 21?? (label hidden) | **23Y1**, rotation → 180° |
+| 21KA7 | 21?? (label hidden) | **23Y1**, rotation 0° → 180°. Expected to light on lever right, **VERIFY** |
 | 21KA2 | hidden | 23Y5 + 23Y6, platforms close |
-| 21KA8 | 2181 | **23Y2**, rotation → 0° |
+| 21KA8 | 2181 | **23Y2**, rotation 180° → 0°. **Lights on lever left** (photo, 2026-09-29) |
 
 A second row of coil terminals is commoned by an orange jumper bar, and a white wire is marked 0V. Exact model
 (G2RV-SL700 assumed from the look) **VERIFY** from the side label.
@@ -147,8 +147,9 @@ Omron G2RV-SL700 datasheet data:
   two relays, not the current fault.
 - **Spare:** the plug-in relay for a G2RV-SL700 **24 VDC** unit is **G2RV-1-S DC21**, not DC24.
 
-There is also a Siemens contactor (1/L1, 3/L2, 5/L3) right of the relays with 24V-labelled wires. It is probably the pump
-contactor for 10M0, **VERIFY**.
+Right of the relays are Siemens SIRIUS contactor hardware: main terminals 1/L1, 3/L2, 5/L3 plus 21NC, with 24V-labelled
+wires, and a front auxiliary block (.1 NC, .3 NO / .2 NC, .4 NO) tagged **24K5**, i.e. drawn on page 24. Which contactor
+switches the pump motor 10M0: **VERIFY**.
 
 ---
 
@@ -169,6 +170,11 @@ contactor for 10M0, **VERIFY**.
 - **2026-09-29** Page 23 read: 23Y1 = wire 231 / X6:231 from 21KA7, and 23Y2 = wire 232 / X6:232 from 21KA8. Both
   rotation relays are fed through **23S1 → X5:239 → 23S2 → X5:230**; the platform relays are not. Next step: the X5
   voltage check in §4.
+- **2026-09-29** Lever held **left** (photo): LEDs lit on **20KA1 and 21KA8** only; 21KA7 off.
+  - Left = 21KA8 = 23Y2 = rotation 180° → 0°.
+  - One direction at a time, held steady while the lever is held. So the PLC side is working, and the 24 V is lost
+    between 21KA8 and 23Y2.
+  - Lever right not photographed yet (expected: 20KA1 + 21KA7).
 
 ---
 
@@ -176,8 +182,8 @@ contactor for 10M0, **VERIFY**.
 
 1. **The hydraulics are not the suspect yet.** The rotation valve never shifts, so nothing downstream of it can
    move or build pressure. The flat top gauge is a consequence, not a second fault.
-2. **The lever, PLC inputs and program are probably fine.** The relays light for left/right, so the PLC is asking for
-   rotation.
+2. **The lever, PLC inputs and program are fine for this fault.** Lever left lights 21KA8 (with 20KA1) and it stays lit
+   while held (photo, 2026-09-29). The PLC is asking for rotation and not aborting.
 3. **The top suspect is 23S1 or 23S2 (or their cables or X5 terminals).** Page 23 shows they are the only thing that
    both rotation valves share and the platform valves do not. One of them open produces exactly this symptom:
    - relays click;
@@ -199,8 +205,9 @@ contactor for 10M0, **VERIFY**.
 
 ## 4. Test plan (do in order; log each result in §2 with the date)
 
-**Step 1: static check at X5 (no lever, nothing moves).** Machine powered, meter on DC volts, black lead on any X6 `0V`
-terminal:
+**Step 1: static check at X5 (no lever, nothing moves).** Machine powered, meter on DC volts. Black lead on any X6 `0V`
+terminal, or where the white `0V` wire lands on the relay row. Wire `230` can also be read at terminal 11 on the bottom
+of 21KA7/21KA8:
 
 | Red lead on | Expect | If 0 V |
 |---|---|---|
@@ -238,7 +245,7 @@ rotation zone (§7).
 1. What actuates 23S1 and 23S2, and in which machine state rotation is meant to be blocked. Ask Toppy, or read the
    manual.
 2. Where `+24EV` is generated (source page not legible on page 23). Is it switched by the safety circuit?
-3. What 20KA1 does (page 20); the relay-to-move map (§2).
+3. What 20KA1 does (page 20). It lights with every move; pump contactor is the guess. Confirm lever right lights 21KA7.
 4. Function of 14S5, 14BG8/9 and 15BG0/1.
 5. Where 14SP3/14SP4 are and their set points. Are they the knob-adjusted devices beside the gauges?
 6. Which circuit each gauge reads.
