@@ -8,6 +8,7 @@ directory with a `HANDOFF.md` as its living record.
 | Directory | Subject | Status |
 |---|---|---|
 | `syntegon-wrapper-watlow/` | Syntegon wrapper, Watlow EZ-ZONE RM temperature control | Open — see the action list in its `HANDOFF.md` §6 |
+| `toppy-inverter-rotation/` | Toppy Inverter Floor Level pallet inverter — rotation (23Y1/23Y2) won't energize | Open — see the action list in its `HANDOFF.md` §6 |
 
 ## Conventions
 
