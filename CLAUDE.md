@@ -23,6 +23,8 @@ directory with a `HANDOFF.md` as its living record.
 - **Date the event log.** Anything done to a machine goes in the project's event log with
   the date and the observed result, not just the intent.
 - Prices and stock levels go stale; re-check before purchasing.
+- **Replies while troubleshooting at the machine: simple and to the point.** Say what's going on in a sentence or
+  two, then give numbered steps, each with the expected reading and what to do next. Put the details in `HANDOFF.md`.
 
 ## Safety
 
