@@ -175,6 +175,9 @@ switches the pump motor 10M0: **VERIFY**.
   - One direction at a time, held steady while the lever is held. So the PLC side is working, and the 24 V is lost
     between 21KA8 and 23Y2.
   - Lever right not photographed yet (expected: 20KA1 + 21KA7).
+- **2026-09-30** Tech reports that one of the rotation limit switches is **bad** (which one, 23S1 or 23S2, still to be
+  recorded). Looking for a replacement in the shop. Original part: Pizzato FR 355 (adjustable roller lever, NC 11–12
+  used).
 
 ---
 
